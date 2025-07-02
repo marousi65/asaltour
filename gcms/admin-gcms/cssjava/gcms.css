@@ -1,0 +1,442 @@
+@charset "utf-8";
+/* CSS Document */
+body {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	margin-right: 0px;
+	background-color: #bbd2e0;
+	color: #003250;
+	font-size:13px;
+	font-family:tahoma;
+	min-width: 785px;
+	behavior: url("/gcms/css/csshover.htc"); 
+	background:url(/gcms/admin-gcms/images/backgad.gif) repeat-x top #2d77a6  ;
+}
+ h2 { color:#ccebf7 ; font-family: Tahoma; padding-top:7px; padding-right:10px; margin-top:0px; font-size:12px ; font-weight:normal }
+ a {text-decoration: none;color: #003250 }
+ a:hover { text-decoration: none;color: #000033}
+
+#top {
+	background:url(/gcms/admin-gcms/images/up-bg-main.png) no-repeat ;
+	height:130px ;
+	width:891px;
+	margin-top:0px;	
+}
+#top .wellcom{
+	text-align:right;
+	direction:rtl;
+	padding-right:30px;
+	padding-top:20px;
+	color: #FFFFFF;
+	font-size:11px;
+	margin-top:0px;
+}
+#top .txt{
+	text-align:right;
+	direction:rtl;
+	padding-right:25px;
+	padding-top:4px;
+	color: #010000;
+	font-size:11px;
+	margin-top:0px;	
+}
+#top .txt a{
+	color: #FFFFFF;
+}
+#head {
+	background:url(/gcms/admin-gcms/images/head-bg-main.png) ;
+	width:891px;
+}
+#downhead {
+	background:url(/gcms/admin-gcms/images/down-head.png) no-repeat ;
+	width:891px;
+	height:11px;
+}
+.clear {
+	clear:both;
+}
+#helpbtt{	
+	background:url(/gcms/admin-gcms/images/help.png)  no-repeat ;
+	width:99px;
+	height:28px;
+	margin-top:16px;
+	margin-left:40px;
+	float:left
+}
+#displaybtt{	
+	background:url(/gcms/admin-gcms/images/dipllsite.png)  no-repeat ;
+	width:99px;
+	height:28px;
+	margin-top:16px;
+	margin-left:3px;
+	float:left;
+}
+
+#mainbody {
+	margin-bottom:0px;
+	margin-left:7px ;
+	margin-right:7px ;
+	margin-top:0px;
+}
+#mainbody .leftbody {
+	float:left;
+	direction:rtl;
+	text-align:right;
+	padding-top:0px;
+	width:720px	;
+	
+}
+#err-mess {
+	background: #ccebf7;
+	width:670px;
+	height:70px;
+	margin-top:10px;
+	margin-right:5px;
+	padding: 5px 15px 5px 20px;
+	cursor: default;
+	border-width: 1px;
+	border-style: solid;
+	box-sizing: content-box;
+	border-color: #2e6f95 !important;
+	color: #FF0000 !important;
+	text-align:justify;
+}
+#err-mess:hover {
+	border-color: #FF0000 !important;
+	color: #FF0000 !important;
+}
+#mainbody .rightbody {
+	background:url(/gcms/admin-gcms/images/bckmenu.png)  ;
+	float:right;
+	width:145px;
+	direction:rtl;
+	text-align:right;
+
+}
+#bnnmenu {
+	background:url(/gcms/admin-gcms/images/bnnmenu.png)  ;
+	width:145px;
+	height:33px;
+	float:right;
+	margin-top:1px;
+}
+#dwnmenu {
+	background:url(/gcms/admin-gcms/images/dwnmenu.png)  ;
+	width:143px;
+	height:16px;
+	padding-right:1px;
+	margin-right:1px !ie;
+
+}
+#menuup {
+	background:url(/gcms/admin-gcms/images/bt-up.png)  no-repeat top ;
+	width:137px;
+	height:38px;
+	padding-top:5px;
+}
+#menuuphover{
+	background:url(/gcms/admin-gcms/images/bt-up-a.png)  no-repeat top ;
+	width:137px;
+	height:38px;
+}
+#menuup:hover{
+	background:url(/gcms/admin-gcms/images/bt-up-a.png)  no-repeat top ;
+	
+}
+#upmentxt {
+	padding-right:30px;
+	font-family:tahoma;
+	font-size:14px;
+	font-weight:bold;
+
+
+}
+#upmentxt a {
+	color: #003250;
+}
+#upmentxt a:hover {
+	color: #003250;
+}
+#menumid {
+	background:url(/gcms/admin-gcms/images/bt-mid.png)  no-repeat top ;
+	width:143px;
+	height:32px;
+	
+}
+#menumid:hover{
+	background:url(/gcms/admin-gcms/images/bt-mid-a.png)  no-repeat  top ;
+}
+#menumidhover{
+	width:143px;
+	height:32px;
+	background:url(/gcms/admin-gcms/images/bt-mid-a.png)  no-repeat  top ;
+	padding-right:0px;
+}
+
+#midmentxt {
+	padding-right:10px;
+	font-family:tahoma;
+	font-size:11px;
+	color:#11537b;
+	padding-top:5px;
+}
+#midmentxt a {
+	color: #003250;
+	padding-top:2px;
+	margin-top:3px;
+	
+}
+#midmentxt a:hover {
+	color: #003250;
+	padding-top:2px;
+	margin-top:3px;
+}
+#menudown {
+	background:url(/gcms/admin-gcms/images/bt-down.png)  no-repeat top  ;
+	width:137px;
+	height:36px;
+}
+#menudown:hover{
+	background:url(/gcms/admin-gcms/images/bt-down-a.png)  no-repeat  top ;
+}
+#menudownhover{
+	background:url(/gcms/admin-gcms/images/bt-down-a.png)  no-repeat  top ;
+	width:137px;
+	height:36px;
+}
+#downmentxt {
+	padding-right:30px;
+	font-family:tahoma;
+	font-size:14px;
+	font-weight:bold;
+	color: #003250;
+}
+#downmentxt a {
+	color: #003250;
+	padding-top:2px;
+	margin-top:3px;
+}
+#downmentxt a:hover {
+	color: #003250;
+	padding-top:2px;
+	margin-top:3px;
+}
+#uptable {
+	font-size:11px;
+	margin-top:0px;
+	padding-bottom:10px;
+	background:url(/gcms/admin-gcms/images/bktb.png);
+	color:#002e4a;
+	padding-right:10px;
+}
+#uptable a {
+	color: #002e4a;
+}
+#mytb {
+	float:right;
+	width:520px;
+	background:url(/gcms/admin-gcms/images/headcen.png)  no-repeat ;
+	
+}
+#leftsidb{
+	float:left;
+}
+#pagediv {
+	font-size:11px;
+	margin-top:0px;
+	height:50px;
+	padding-top:20px;
+	padding-right:20px;
+	background:url(/gcms/admin-gcms/images/dwntbl.png) ;
+}
+#ppag {
+	width:15px;
+	height:15px;
+	float:right;
+	border:1px #0e5079 solid;
+	text-align:center;
+	background:#0e5079;
+	color:#FFFFFF;
+	margin-right:3px;
+}
+#ppag:hover {
+	background: #FFFFFF;
+	color:#0e5079;
+	border:1px #0e5079 solid;
+	cursor:pointer;
+}
+#ppagnolink {
+	width:15px;
+	height:15px;
+	float:right;
+	border:1px #0e5079 solid;
+	text-align:center;
+	background:#FFFFFF;
+	margin-right:3px;
+	color:#0e5079;
+}
+#leftsidup {
+	background:url(/gcms/admin-gcms/images/lef-sidb-up.png)  no-repeat ;
+	width:190px;
+	height:34px;
+}
+#leftsiduptxt {
+	padding-top:8px;
+	font-size:11px;
+	text-align:center;
+	color:#ccebf7;
+
+	
+}
+#leftsidmid {
+	background:url(/gcms/admin-gcms/images/lef-sidb-mid.png) repeat-y;
+	width:190px;
+}
+#leftsidmidtxt {
+	padding-right:9px;
+	padding-top:5px;
+	font-size:12px;
+	text-align: right;
+	text-align:justify;
+	padding-left:8px;
+	color:#002e4a;
+}
+#leftsiddown {
+	background:url(/gcms/admin-gcms/images/lef-sidb-down.png)  no-repeat  top   ;
+	width:190px;
+	height:23px;
+		
+}
+#leftsiddowntxt {
+	padding-right:9px;
+	padding-top:0px;
+	font-size:11px;
+	text-align: center;
+	padding-left:8px;
+
+}
+#input {
+
+	border:1px solid #10527a;
+	font-size:12px;
+	margin:5px 5px 5px 5px;
+	font-family:Tahoma;
+	padding:2px 2px 2px 2px;
+}
+input.invalid {
+	background: #FFFFCC !important;
+	border:1px #FF0000 dotted  !important;
+}
+
+label.invalid {
+
+	color: #0000CC;
+	font-weight: bold;
+}
+
+#submitinput {
+	background: #21759B url(/gcms/admin-gcms/images/bt-a.gif) ;
+	border:#66757b 1px solid;
+	font-family:Tahoma;
+	color:#002e4a;
+	margin:5px 5px 5px 5px;
+	cursor:pointer;
+}
+#submitinput:hover {
+	background:url(/gcms/admin-gcms/images/bt-b.gif) !important;
+}
+#submitinput:active {
+	background:url(/gcms/admin-gcms/images/bt-c.gif) !important;
+}
+#bodydown {
+	clear:both;
+	padding-top:60px;
+}
+#copyrgh {
+	text-align:center;
+	font-size:9px;
+	direction:rtl;
+	line-height:12px;
+	background:  url(/gcms/admin-gcms/images/copybck.gif);
+	margin-right:1px;
+	margin-left:2px;
+}
+#foldershow {
+	float:right;
+	padding-right:70px;
+	padding-bottom:25px;
+	background:  url(/gcms/admin-gcms/images/folderclose.png) no-repeat left top;
+	padding-top:35px;
+}
+#foldershow:hover  {
+	background:  url(/gcms/admin-gcms/images/folder.png) no-repeat left top;
+}
+
+.fileshow {
+	padding-right:150px;
+	padding-left:145px;
+	padding-bottom:10px;
+	padding-top:10px;
+	width:200px;
+	text-align:left;
+	border:1px #000099 solid;
+	margin-top:10px;
+}
+
+#delbtt {
+	font-family:tahoma;
+	font-size:11px;
+}
+#delbtt a {
+	color: #FF0000;
+}
+#delbtt a:hover {
+	color: #FFFFFF;
+	background:#FF0000;
+	border:#FF0000;
+	border-style: solid;
+	-moz-border-radius: 5px;
+}
+#galleryshow {
+	padding-right:70px;
+	padding-bottom:25px;
+	background:  url(/gcms/admin-gcms/images/gallerclose.png) no-repeat left top;
+	padding-top:35px;
+	margin-left:300px;
+}
+#galleryshow:hover  {
+	background:  url(/gcms/admin-gcms/images/galler.png) no-repeat left top;
+}
+#shortcut {
+	float: right;
+	border: #000066 solid 0px;
+	width:200px;
+	height: auto;
+	padding-right:0px;
+	padding-left:0px;
+	margin-right:20px;
+}
+#bhdshb{
+	background:  url(/gcms/admin-gcms/images/bktb.png);
+	color:#002e4a;
+	font-size:12px;
+	line-height:19px;
+}
+#glldshb{
+	background:  url(/gcms/admin-gcms/images/bktb.png);
+	padding-right:10px;
+
+}
+#dwbckdsh{
+	background:  url(/gcms/admin-gcms/images/dwntbl.png);
+	height:50px;
+}
+#bckfile{
+	background:  url(/gcms/admin-gcms/images/bktb.png);
+	height:100%;
+	color:#002e4a;
+	font-size:12px;
+	line-height:19px;
+	padding-right:10px;
+}

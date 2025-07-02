@@ -1,0 +1,68 @@
+@charset "utf-8";
+table {
+  font: tahoma;
+	width:100%;
+	direction:rtl;
+	text-align:right;
+	background:url(/gcms/admin-gcms/images/bktb.png) ;
+  }
+td, th {
+  padding: .4em;
+  color: #002e4a;
+  text-align:right;
+  height:30px;
+  font-size:11px;
+  padding-right:10px;
+    }
+
+thead th, tfoot th {
+  font: bold 11px tahoma;
+  text-align: right;
+  color: #1b4760;
+  padding-top:3px;
+  padding-right:10px;
+  height:40px;
+  }
+tbody td a {
+  text-decoration: none;
+  color: #336699;
+  }
+tbody td a:hover {
+  color: #003366;
+  }
+tbody th a {
+  font: normal 11px verdana, arial, helvetica, sans-serif;
+  background: transparent;
+  text-decoration: none;
+  font-weight:normal;
+  color: #363636;
+  }
+tbody th a:hover {
+  background: transparent;
+  color: #363636;
+  }
+tbody th, tbody td {
+  vertical-align: middle;
+  text-align: right;
+  }
+tfoot td {
+  
+  padding-top:3px;
+  color: #FFFF00;
+  }
+.odd {
+	background:url(/gcms/admin-gcms/images/oddbck.png) repeat-y ;
+	background:url(/gcms/admin-gcms/images/space.gif) repeat-y !ie ;
+  }
+.even {
+
+  }
+tbody tr:hover {
+	background:url(/gcms/admin-gcms/images/oddbck.png) repeat-y ;
+	background:url(/gcms/admin-gcms/images/space.gif) repeat-y !ie ;
+  }
+tbody tr:hover th,
+tbody tr.odd:hover th {
+  background: #FFD800;
+  color: #5893ac;
+  }
