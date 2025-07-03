@@ -1,0 +1,128 @@
+/* ------------------
+ styling for the tables 
+   ------------------   */
+
+
+
+#hor-minimalist-a
+{
+	margin:5px;
+	border-collapse: collapse;
+}
+#hor-minimalist-a th
+{
+	font-weight: normal;
+	color: #039;
+	padding: 10px 8px;
+	border-bottom: 2px solid #6678b1;
+}
+#hor-minimalist-a td
+{
+	color: #669;
+	padding: 9px 8px 0px 8px;
+}
+#hor-minimalist-a tbody tr:hover td
+{
+	color: #009;
+}
+#hor-minimalist-a thead tr td
+{
+	color: #663300;
+}
+
+/* ------------------
+ styling for the tables 
+   ------------------   */
+
+
+
+#hor-minimalist-a-1
+{
+	margin:0px;
+	border-collapse: collapse;
+	width:290px;
+}
+#hor-minimalist-a-1 th
+{
+	font-weight: normal;
+	color: #039;
+	padding: 10px 8px;
+	border-bottom: 2px solid #6678b1;
+}
+#hor-minimalist-a-1 td
+{
+	color: #669;
+	padding: 9px 8px 0px 8px;
+}
+#hor-minimalist-a-1 tbody tr:hover td
+{
+	color: #009;
+}
+#hor-minimalist-a-1 thead tr td
+{
+	color: #663300;
+}
+/* ------------------
+ styling for the tables 
+   ------------------   */
+
+
+
+#hor-minimalist-a-2
+{
+	margin:5px;
+	border-collapse: collapse;
+	width:350px;
+}
+#hor-minimalist-a-2 th
+{
+	font-weight: normal;
+	color: #039;
+	padding: 10px 8px;
+	border-bottom: 2px solid #6678b1;
+}
+#hor-minimalist-a-2 td
+{
+	color: #669;
+	padding: 9px 8px 0px 8px;
+}
+#hor-minimalist-a-2 tbody tr:hover td
+{
+	color: #009;
+}
+#hor-minimalist-a-2 thead tr td
+{
+	color: #663300;
+}
+/* ------------------
+ styling for the tables 
+   ------------------   */
+
+
+
+#hor-minimalist-a-3
+{
+	margin:5px;
+	border-collapse: collapse;
+	width:650px;
+}
+#hor-minimalist-a-3 th
+{
+	font-weight: normal;
+	color: #039;
+	padding: 10px 8px;
+	border-bottom: 2px solid #6678b1;
+}
+#hor-minimalist-a-3 td
+{
+	color: #669;
+	padding: 9px 8px 0px 8px;
+}
+#hor-minimalist-a-3 tbody tr:hover td
+{
+	color: #009;
+}
+#hor-minimalist-a-3 thead tr td
+{
+	color: #663300;
+}

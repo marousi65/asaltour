@@ -1,0 +1,263 @@
+.bg_top {
+background:url(/gcms/images/bg_top.gif) no-repeat bottom ;
+width:951px;
+height:6px;
+margin-top:10px;
+}
+.bg_mid {
+background:url(/gcms/images/bg_mid.gif) repeat-y ;
+width:951px;
+}
+.bg_dwn {
+background:url(/gcms/images/bg_dwn.gif) no-repeat ;
+width:951px;
+height:9px;
+}
+.leftsb {
+width:720px;
+}
+.rightsb {
+width:230px;
+}
+.bg_menu {
+background:url(/gcms/images/bg_menu.gif) no-repeat;
+width:698px;
+height:34px;
+margin:0 auto;
+}
+.bg_top_box1 {
+background:url(/gcms/images/bg_top_box1.jpg) no-repeat;
+width:349px;
+height:41px;
+}
+.bg_top_box1 .title{
+color:#FFFFFF;
+margin-right:30px;
+text-align:right;
+padding-top:12px;
+}
+.bg_mid_box1 {
+background:url(/gcms/images/bg_mid_box1.gif) repeat-y;
+width:349px;
+}
+.bg_mid_box1 .txt{
+text-align:justify;
+padding:0px 15px 0px 15px;
+}
+.bg_dwn_box1 {
+background:url(/gcms/images/bg_dwn_box1.jpg) no-repeat;
+width:349px;
+height:13px;
+}
+.header {
+width:699px;
+height:152px;
+margin:0 auto;
+margin-top:10px;
+}
+.bg_top_box2 {
+background:url(/gcms/images/bg_top_box2.jpg) no-repeat;
+width:699px;
+height:67px;
+margin:0 auto;
+margin-top:10px;
+}
+.bg_top_box2 .title{
+color:#FFFFFF;
+margin-right:30px;
+padding-top:24px;
+text-align:right;
+}
+.bg_mid_box2 {
+background:url(/gcms/images/bg_mid_box2.gif) repeat-y;
+width:699px;
+margin:0 auto;
+}
+.bg_mid_box2 .txt{
+text-align:justify;
+padding:0px 15px 0px 15px;
+margin-top:-5px;
+}
+.bg_dwn_box2 {
+background:url(/gcms/images/bg_dwn_box2.jpg) no-repeat;
+width:699px;
+height:14px;
+margin:0 auto;
+}
+.header_R {
+width:216px;
+height:79px;
+margin-top:10px;
+margin:0 auto;
+}
+.bg_top_box3 {
+background:url(/gcms/images/bg_top_box3.gif) no-repeat bottom;
+width:215px;
+height:12px;
+margin:0 auto;
+margin-top:10px;
+}
+.bg_top_box3 .title{
+color:#FFFFFF;
+margin-right:30px;
+padding-top:24px;
+text-align:right;
+
+}
+.bg_mid_box3 {
+background:url(/gcms/images/bg_mid_box3.gif) repeat-y;
+width:215px;
+margin:0 auto;
+}
+.bg_mid_box3 .txt{
+text-align:justify;
+color:#FFFFFF;
+padding:0px 15px 0px 15px;
+}
+.bg_dwn_box3 {
+background:url(/gcms/images/bg_dwn_box3.gif) no-repeat;
+width:215px;
+height:12px;
+margin:0 auto;
+}
+.bg_top_box4 {
+background:url(/gcms/images/bg_top_box4.jpg) no-repeat;
+width:217px;
+height:39px;
+margin:0 auto;
+margin-top:10px;
+}
+.bg_top_box4 .title{
+color:#FFFFFF;
+margin-right:30px;
+padding-top:16px;
+text-align:right;
+
+}
+.bg_mid_box4 {
+background:url(/gcms/images/bg_mid_box4.gif) repeat-y;
+width:217px;
+margin:0 auto;
+}
+.bg_mid_box4 .txt{
+text-align:justify;
+padding:0px 15px 0px 15px;
+}
+.bg_dwn_box4 {
+background:url(/gcms/images/bg_dwn_box4.jpg) no-repeat;
+width:217px;
+height:15px;
+margin:0 auto;
+}
+.copyright {
+width:951px;
+height:25px;
+margin:0 auto;
+color:#000000;
+text-align:center;
+margin-top:10px;
+}
+.copyright a{
+color:#660000;
+}
+.copyright a:hover{
+color: #330000;
+}
+.arr {
+background:url(/gcms/images/arr.gif) no-repeat right top;
+padding-right:25px;
+width:165px;
+height:18px;
+}
+.arr:hover{
+background:url(/gcms/images/arr.gif) no-repeat right bottom;
+color:#FF0000;
+}
+.arr:hover a{
+color:#FF0000;
+}
+#g_username {
+width:90px;
+height:20px;
+}
+#g_btt {
+background:url(/gcms/images/bg_btt.gif) no-repeat;
+width:84px;
+height:30px;
+border:0;
+color:#FFFFFF;
+margin-right:60px;
+padding-bottom:5px;
+}
+.box3_r{
+width: 96px;
+padding-top:5px;
+}
+.box3_l{
+width: 96px;
+}
+#s_btt {
+background:url(/gcms/images/se_btt.gif) no-repeat;
+width:93px;
+height:24px;
+border:0;
+color:#FFFFFF;
+margin-right:50px;
+padding-bottom:8px;
+padding-left:20px;
+cursor:pointer;
+}
+#slct{
+width:110px;
+height:30px;
+font-size:11px;
+border:1px solid #660000;
+}
+#slct:hover{
+background: #CCCCCC;
+}
+#formtable{
+width:250px;
+}
+#formtable1{
+width:270px;
+}
+#selectroz{
+width:50px;
+}
+#slthamrh{
+width:45px;
+height:25px;
+font-size:10px;
+border:0px solid #660000;
+background: #FFFFFF;
+}
+#slthamrh:hover{
+background: #837258;
+}
+#inphmr{
+width:90px;
+margin-right:10px;
+margin-left:20px;
+}
+#inphmrh{
+width:85px;
+margin-right:5px;
+margin-left:5px;
+}
+#txarroll{
+width:500px;
+height:100px;
+margin-right:80px;
+text-align:justify;
+}
+#sltvehicle{
+width:80px;
+height:25px;
+font-size:10px;
+border:0px solid #660000;
+background:#e8e4db;
+}
+#sltvehicle:hover{
+background: #837258;
+}

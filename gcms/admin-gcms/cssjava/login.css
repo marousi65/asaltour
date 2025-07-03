@@ -1,0 +1,88 @@
+@charset "utf-8";
+body {
+	font-family:tahoma;
+	color:#255f8f;
+	font-size:11px;
+	background:url(/gcms/admin-gcms/images/login-back.gif) repeat-x center #005194 ;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	margin-left:0px;
+	margin-right:0px;
+}
+ a {text-decoration: underline;color: #255f8f }
+ a:hover { text-decoration: underline;color: #255f8f}
+ 
+
+#main {
+	background:url(/gcms/admin-gcms/images/main.png) no-repeat ;
+	width:452px;
+	height:242px;
+	margin-top:150px;
+	margin-left: auto;
+	margin-right:auto;
+	direction:rtl;
+}
+#main .txt{
+	text-align:right;
+	padding-top:32px;
+	padding-right:50px;
+	line-height:22px;
+}
+#input {
+	background:#fbfbfb;
+	border:1px solid #c5c5c5;
+	height:20px;
+	width:130px;
+	font-size:15px;
+	direction:ltr;
+}
+input.invalid {
+	background: #FFFFCC !important;
+	border:1px #FF0000 dotted  !important;
+}
+
+label.invalid {
+
+	color: #0000CC;
+	font-weight: bold;
+}
+
+#submitinput {
+	font-family: tahoma;
+	text-decoration: none;
+	font-size:11px;
+	cursor: pointer;
+	color: #FFFFFF;
+	background:url(/gcms/admin-gcms/images/submitinput.gif);
+	width:59px;
+	height:23px;
+	border:0px;
+	padding-bottom:4px;
+}
+#submitinput:hover {
+	background: #21759B url(/gcms/admin-gcms/images/submitinput.gif);
+}
+#submitinput:active {
+	background: #21759B url(/gcms/admin-gcms/images/submitinput.gif);
+}
+.clearall {
+	clear:both;
+}
+.copyright {
+	font-size:9px;
+	color: #000000;
+	text-align:center;
+	padding-top:30px;
+	color:#CCCCCC;
+}
+.copyright a{
+	color: #FFFFFF;
+}
+#error-message {
+	color:#FF0000;
+	font-weight:bold;
+	padding-right:210px;
+	padding-top:60px;
+	position:absolute;
+}
+

@@ -1,0 +1,58 @@
+.clear {
+clear:both;
+}
+.c1 {
+width:200px;
+height:22px;
+margin:175px 70px 0 0;
+float:right;
+font-size:20px;
+font-weight:bold;
+text-align:right;
+overflow:hidden;
+border:0px solid #FF0000;
+}
+.c2 {
+width:140px;
+height:22px;
+margin:175px 170px 0 0;
+float:right;
+font-size:20px;
+font-weight:bold;
+text-align:right;
+overflow:hidden;
+border:0px solid #FF0000;
+}
+.c3 {
+width:190px;
+height:22px;
+margin:15px 100px 0 0;
+float:right;
+font-size:20px;
+font-weight:bold;
+text-align:right;
+overflow:hidden;
+border:0px solid #FF0000;
+}
+.c4 {
+width:170px;
+height:18px;
+margin:20px 130px 0 0;
+float:right;
+font-size:13px;
+font-weight:bold;
+text-align:right;
+overflow:hidden;
+border:0px solid #FF0000;
+}
+.c5 {
+width:190px;
+height:22px;
+margin:15px 160px 0 0;
+float:right;
+font-size:20px;
+font-weight:bold;
+text-align:right;
+overflow:hidden;
+border:0px solid #FF0000;
+}
