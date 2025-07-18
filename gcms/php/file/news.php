@@ -1,291 +1,205 @@
 <?php
+declare(strict_types=1);
 
-if ($pluginsetup[news]){
+namespace GCMS\File;
 
-require $_SERVER['DOCUMENT_ROOT'].'/gcms/php/file/gconfig.php';
+use Smarty;
 
-	if ($_GET[opinion] AND $_REQUEST[submitbtt] AND $_REQUEST[email]){
-		
-	//security////////////////////////
-	$sec30time = time()-30;
-	if (mysql_fetch_array(mysql_query("SELECT * FROM `gcms_comment` WHERE comment_date > '$sec30time' AND comment_author_ip = '$_SERVER[REMOTE_ADDR]' ",$link))){
-	if ($_SESSION["hacker"] == "news" and $_SESSION['counternews'] > 2 ){mysql_query("INSERT INTO `gcms_blocked` ( `ip` ) VALUES ('$_SERVER[REMOTE_ADDR]')",$link);}
-	$_SESSION['hacker'] = "news";
-	if ( $_SESSION['counternews']  >= 1 ) { ++$_SESSION['counternews']; }else { $_SESSION['counternews']= 1; }
-	//sleep(15);
-	echo "<script>window.location='?part=page&id=$configset[first_page]';</script>";
-	}
-	//security\\\\\\\\\\\\\\\\\\\\\\\
-		
-		
-		if ( $configset[comment_publish_immd] == "yes" ){
-		 $comment_approved = "confirm";
-		}else {
-		 $comment_approved = "rejcet";
-		 $comes =  "  و بعد از تایید مدیر سایت نمایش داده می شود";
-		}
-		if ($_REQUEST["vercode"] != $_SESSION["vercode"] OR $_SESSION["vercode"]=='')  { 
-			$message = "
-				کد امنیتی اشتباه وارد شده. <br>
-			";
-		} else { 
-		$comdate = time();
-		$ip = $_SERVER['REMOTE_ADDR'] ;
-		$_REQUEST[content] = htmlspecialchars("$_REQUEST[content]", ENT_QUOTES);
-		$_REQUEST[name] = htmlspecialchars("$_REQUEST[name]", ENT_QUOTES);
-		$_REQUEST[url] = htmlspecialchars("$_REQUEST[url]", ENT_QUOTES);
-			//کوئری اضافه کردن به جدول 
-			$que_add = "INSERT INTO `gcms_comment` ( `page_id` ,`comment_author` ,`comment_author_email` ,`comment_author_url` ,`comment_author_ip` ,`comment_date` ,`comment_approved` ,`comment_content`, `comment_parent` ) 
-			VALUES ('$_REQUEST[id]' ,'$_REQUEST[name]' ,'$_REQUEST[email]' ,'$_REQUEST[url]' ,'$ip' ,'$comdate', '$comment_approved', '$_REQUEST[content]' ,'0' )";
-			//انجام کوئری
-			
-				if ( mysql_query($que_add,$link) ){
-				$message = "نظر شما با موفقیت به ثبت رسید" . $comes;
-				}else{
-				// در صورت برخورد با مشکل
-				$message  = "مشکل در ثبت نظر شما لطفا دوباره تلاش کنید";
-				}
-				}
-////////////ارسال های پیام  ////////////////////////////////////////////////////////			
-			$gcms->assign('message',$message); 
-		
-	}
+// بارگذاری تنظیمات و توابع
+require_once __DIR__ . '/../../gconfig.php';
+require_once __DIR__ . '/../../jdf.php';
 
-if ( !$_GET[id] ){
-		///////// list of news
-		
-		////find group
-		
-			$query_group = "SELECT * FROM `gcms_term`  WHERE term_tax = 'news_group'  ORDER BY `gcms_term`.`term_name` DESC  ";
+global $gcms, $link;
 
-		//نتایج
-			$result_group = mysql_query($query_group,$link);
-		//سطر ها
-			$ing = 0;
-			while ($row_group = mysql_fetch_array($result_group)){
-			
-				$news_groupname[$ing]    = $row_group['term_name'];
-				$news_groupurl[$ing]     = "?part=news&term=".$row_group['term_id'];
+// اگر یک نظر (comment) ارسال شده
+if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_GET['opinion'], $_POST['email'])) {
+    // ساده‌ترین مکانیزم جلوگیری از اسپم (ارسال مکرر زیر ۳۰ ثانیه)
+    $thirtyAgo = time() - 30;
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $spamCheckQuery = "
+        SELECT 1
+          FROM `gcms_comment`
+         WHERE comment_date > ? 
+           AND comment_author_ip = ?
+      LIMIT 1";
+    $stm = mysqli_prepare($link, $spamCheckQuery);
+    mysqli_stmt_bind_param($stm, 'is', $thirtyAgo, $ip);
+    mysqli_stmt_execute($stm);
+    mysqli_stmt_store_result($stm);
+    if (mysqli_stmt_num_rows($stm) > 0) {
+        // بلاک کردن آی‌پی یا نمایش خطای کاربر
+        echo "<script>window.location='?part=page&id={$configset['first_page']}';</script>";
+        exit;
+    }
 
-				$ing++;
-			}
-			
-////////////ارسال های گروه ها ////////////////////////////////////////////////////////			
-			$gcms->assign('news_groupname',$news_groupname); 
-			$gcms->assign('news_groupurl',$news_groupurl); 
-		
-		//\\\end find group
-		
-// تعریف کوئری برای لیست 
+    // اعتبارسنجی کپچا
+    if (empty($_SESSION['vercode']) || $_POST['vercode'] !== $_SESSION['vercode']) {
+        $gcms->assign('comment_message', 'کد امنیتی اشتباه است.');
+    } else {
+        // آماده‌سازی داده‌ها
+        $name    = htmlspecialchars($_POST['name']   ?? '', ENT_QUOTES, 'UTF-8');
+        $email   = htmlspecialchars($_POST['email']  ?? '', ENT_QUOTES, 'UTF-8');
+        $url     = htmlspecialchars($_POST['url']    ?? '', ENT_QUOTES, 'UTF-8');
+        $content = htmlspecialchars($_POST['content']?? '', ENT_QUOTES, 'UTF-8');
+        $date    = time();
+        $approved= ($configset['comment_publish_immd']==='yes') ? 'confirm' : 'reject';
 
-			//کوئری
-			$query_list = " FROM `gcms_pages` JOIN gcms_relationships_page_term ON gcms_relationships_page_term.page_id = gcms_pages.id JOIN gcms_term ON gcms_term.term_id = gcms_relationships_page_term.term_id   WHERE page_status  = 'publish' AND page_type = 'news' ORDER BY `gcms_pages`.`page_date` DESC ";
-	
-	if ($_REQUEST[term]){
-	$query_list = " FROM `gcms_pages` JOIN gcms_relationships_page_term ON gcms_relationships_page_term.page_id = gcms_pages.id JOIN gcms_term ON gcms_term.term_id = gcms_relationships_page_term.term_id   WHERE page_status  = 'publish' AND page_type = 'news' AND gcms_relationships_page_term.term_id = '$_REQUEST[term]' ORDER BY `gcms_pages`.`page_date` DESC";
-	
-	$termlink = "&term=$_REQUEST[term]";
-	}
-		
-	//////////////////////////////////////////////////////////////////////////////////////
-	//شمارنده صفحه ها
-	if(!isset($_GET['page'])){$page = 1;} else { 
-    $page = $_GET['page'];
-	 } 
-	//تعدادی که در صفحه از دیتا بیس می خواند
-	$max_results = $configset[newsnum];
-	$from = (($page * $max_results) - $max_results); 
-	//تعداد موجودی کل
-	$tt = mysql_query("SELECT COUNT(*) as Num $query_list ");
-	if (!$tt){
-	echo "
-		<script>
-		window.location='?part=news';
-		</script>	";
-	}
-	$total_results = mysql_result($tt,0); 
-	if (!$total_results){
-	echo "
-		<script>
-		window.location='?part=news';
-		</script>	";
-	}
-	//تعداد صفحات
-	$total_pages = ceil($total_results / $max_results); 
-	$pagelink = "?part=news".$termlink;
-	//////////////////////////////////////////////////////////////////////////////////////
-
-			////////////////////////////////////////////////////////////////////////////////////
-			//صفحه قبلی
-			if($page > 1){ 
-				$prev = ($page - 1); 
-				$sendpage =  $sendpage."<a href='$pagelink&page=$prev'><div id='page' title='صفحه قبلی' >&laquo;</div></a>"; 
-			} 
-			//صفحه حاضر
-			for($ipage = 1; $ipage <= $total_pages; $ipage++){ 
-				if(($page) == $ipage){$sendpage =  $sendpage. "<div id='pagenolink' >$ipage</div>";} else { 
-						$sendpage =  $sendpage. "<a href='$pagelink&page=$ipage'><div id='page' title='صفحه $ipage' >$ipage</div></a>"; 
-				} 
-			}
-				//صفحه بعدی
-			if($page < $total_pages){ 
-				$next = ($page + 1); 
-				$sendpage =  $sendpage. "<a href='$pagelink&page=$next'><div id='page' title='صفحه بعدی' >&raquo;</div></a>"; 
-			} 
-			////////////////////////////////////////////////////////////////////////////////////
-////////////ارسال های صفحه ////////////////////////////////////////////////////////			
-			$gcms->assign('page',$sendpage); 
-			////////////////////////////////////////////////////////////////////////////////////
-		// درست کردن لیست
-		$query_list = "SELECT * ".$query_list." LIMIT $from, $max_results";
-		
-		//نتایج
-			$result_list = mysql_query($query_list,$link);
-		//سطر ها
-			$i = 0;
-			while ($row_list = mysql_fetch_array($result_list)){
-			
-				$list_page_title[$i]    = $row_list['page_title'];
-				$list_page_excerpt[$i]  = $row_list['page_excerpt'];
-				$list_page_pic[$i]      = $row_list['page_pic'];
-				$list_page_date[$i]     = $date("l j  F  y ",$row_list['page_date']);
-				$list_page_url[$i]      = "?part=news&id=".$row_list['id'];
-				$list_page_group[$i]    = $row_list['term_name'];
-				$list_page_groupid[$i]  = "?part=news&term=".$row_list['term_id'];
-
-				$i++;
-			}
-			
-////////////ارسال های لیست ////////////////////////////////////////////////////////			
-			$gcms->assign('list_page_title',$list_page_title); 
-			$gcms->assign('list_page_excerpt',$list_page_excerpt); 
-			$gcms->assign('list_page_pic',$list_page_pic); 
-			$gcms->assign('list_page_date',$list_page_date); 
-			$gcms->assign('list_page_url',$list_page_url); 
-			$gcms->assign('list_page_group',$list_page_group); 
-			$gcms->assign('list_page_groupid',$list_page_groupid); 
-
-	}else{
-
-// پیدا کردن محتوای صفحه اصلی///////////////////////////////////
-
-
-///////////////////////////////////////////////////////////
-
-//کوئری
-	$query_page = "SELECT * FROM `gcms_pages` JOIN gcms_metauser ON gcms_metauser.user_id = gcms_pages.page_author JOIN gcms_relationships_page_term ON gcms_relationships_page_term.page_id = gcms_pages.id JOIN gcms_term ON gcms_term.term_id = gcms_relationships_page_term.term_id JOIN gcms_metapage ON gcms_metapage.page_id = gcms_pages.id WHERE gcms_pages.id = '$_REQUEST[id]' AND gcms_metauser.metauser_key = 'first_name' ";
-//نتایج
-	$result_page = mysql_query($query_page,$link);
-	
-	
-//سطر ها
-	$row_page = mysql_fetch_array($result_page);
-	
-	if (!$row_page){
-	echo "
-		<script>
-		window.location='?part=news';
-		</script>
-	";
-	}
-		
-		$page_title   = $row_page['page_title'];
-		$page_author  = $row_page['metauser_value'];
-		$page_date    = $date("l j  F  y ",$row_page['page_date']);
-		$page_content = $row_page['page_content'];
-		$page_excerpt = $row_page['page_excerpt'] . "...";
-		$page_costus  = $row_page['comment_status'];
-		$page_pic     = $row_page['page_pic'];
-		$form_id      = $row_page['form_id'];
-		$newskeyword      = $row_page['meta_value'];
-		
-		$news_group   = $row_page['term_name'];
-		$news_groupid = "?part=news&term=".$row_page['term_id'];
-
-		/////// کامنت 
-		if ($page_costus == "open"){
-		
-		$commentform = "
-			<form method='post' action='?part=news&id=$row_page[id]&opinion=true' >
-			نام&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='text' name='name'  id='commentinput' /><br />
-			ایمیل&nbsp;<input type='text' name='email' id='commentinput' class='email' /><br />
-			وب&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='text' name='url'  id='commentinput' /><br />
-			<textarea name='content' id='commenttextarea' class='reqd' ></textarea><br />
-			<img src='/gcms/php/file/captcha.php' align='absmiddle'><input type='text' name='vercode'  class='reqd' id='commentinputsecur' /> <br>
-			لطفا کد تصوری را وارد کنید <br />
-			<input type='submit' value='ارسال نظر' name='submitbtt' id='commentsubmit' onMouseDown='initForms()' /><br />
-			</form>
-		";
-		
-		///////// find all comment
-		
-			//کوئری
-			$query_allcomment = "SELECT * FROM `gcms_comment` WHERE page_id  = '$row_page[id]' AND comment_approved = 'confirm' ";
-		//نتایج
-			$result_allcomment = mysql_query($query_allcomment,$link);
-		//سطر ها
-			$i = 0;
-			while ($row_allcomment = mysql_fetch_array($result_allcomment)){
-			
-				$comment_author[$i]       = $row_allcomment['comment_author'];
-				$comment_author_url[$i]   = $row_allcomment['comment_author_url'];
-				$comment_date[$i]         = $date("l j  F  y ",$row_allcomment['comment_date']);
-				$comment_content[$i]      = $row_allcomment['comment_content'];
-				
-				$i++;
-			}
-////////////ارسال های همه نظرات ////////////////////////////////////////////////////////			
-			$gcms->assign('comment_author',$comment_author); 
-			$gcms->assign('comment_author_url',$comment_author_url); 
-			$gcms->assign('comment_date',$comment_date); 
-			$gcms->assign('comment_content',$comment_content); 
-		
-		}
-		
-	
-	
-
-// پیدا کردن محتوای صفحه اصلی///////////////////////////////////
-
-
-
-
-	}//end else
-
-//تعریف منوی فعال
-	$menu_active = "?part=news";
-
-////////////ارسال های محتوای صفحه ////////////////////////////////////////////////////////			
-
-			$gcms->assign('page_title',$page_title); 
-			$gcms->assign('page_author',$page_author); 
-			$gcms->assign('page_date',$page_date); 
-			$gcms->assign('page_content',$page_content); 
-			$gcms->assign('page_excerpt',$page_excerpt); 
-			$gcms->assign('commentform',$commentform); 
-			$gcms->assign('page_pic',$page_pic); 
-			$gcms->assign('form_id',$form_id); 
-			$gcms->assign('newskeyword',$newskeyword); 
-			
-			$gcms->assign('news_group',$news_group); 
-			$gcms->assign('news_groupid',$news_groupid); 
-
-/////////////////////////////////////////////////////////////////////////////////////////			
-			$gcms->assign('menu_active',$menu_active); 
-			$gcms->assign('part',"news"); 
-
-			$gcms->display("index/index.tpl");
-}else {
-	echo "
-		<script>
-		window.location='?part=page&id=$configset[first_page]';
-		</script>
-	";
-
+        $insertQ = "
+          INSERT INTO `gcms_comment`
+          (page_id, comment_author, comment_author_email, comment_author_url,
+           comment_author_ip, comment_date, comment_approved, comment_content, comment_parent)
+          VALUES (?,?,?,?,?,?,?,?,0)";
+        $stm = mysqli_prepare($link, $insertQ);
+        mysqli_stmt_bind_param(
+            $stm, 'issssiss',
+            $_GET['id'], $name, $email, $url, $ip, $date, $approved, $content
+        );
+        if (mysqli_stmt_execute($stm)) {
+            $msg = 'نظر شما ثبت شد.';
+            if ($approved==='reject') {
+                $msg .= ' پس از تأیید نمایش داده می‌شود.';
+            }
+            $gcms->assign('comment_message', $msg);
+        } else {
+            $gcms->assign('comment_message', 'خطا در ثبت نظر، لطفاً مجدداً تلاش کنید.');
+        }
+    }
 }
 
+// اگر آی‌دی خبر داده نشده، لیست خبری نمایش داده شود
+if (empty($_GET['id'])) {
+    // بارگذاری گروه‌ها
+    $groupQ = "SELECT term_id, term_name 
+               FROM `gcms_term` 
+               WHERE term_tax='news_group' 
+               ORDER BY term_name ASC";
+    $resG   = mysqli_query($link, $groupQ);
+    $groups = [];
+    while ($g = mysqli_fetch_assoc($resG)) {
+        $groups[] = [
+            'name'=>$g['term_name'],
+            'url' =>"?part=news&term={$g['term_id']}"
+        ];
+    }
+    $gcms->assign('news_groups', $groups);
 
-	
-	
+    // معیار فیلتر term
+    $baseFilter = "page_status='publish' AND page_type='news'";
+    if (!empty($_GET['term'])) {
+        $termId = (int) $_GET['term'];
+        $baseFilter .= " AND EXISTS(
+            SELECT 1 FROM gcms_relationships_page_term rpt
+             WHERE rpt.page_id=gcms_pages.id
+               AND rpt.term_id={$termId}
+        )";
+        $termSuffix="&term={$termId}";
+    } else {
+        $termSuffix = '';
+    }
 
-?>
+    // شمارش و صفحه‌بندی
+    $page   = max(1, (int)($_GET['page'] ?? 1));
+    $per    = (int)($configset['newsnum'] ?? 10);
+    $offset = ($page -1)* $per;
+    $countQ = "SELECT COUNT(*) AS cnt
+                 FROM `gcms_pages`
+                WHERE {$baseFilter}";
+    $cntR   = mysqli_query($link, $countQ);
+    $total  = (int) mysqli_fetch_assoc($cntR)['cnt'];
+    $pages  = (int) ceil($total / $per);
+
+    // لینک صفحه‌بندی
+    $links = [];
+    for ($p=1; $p<=$pages; $p++) {
+        $links[] = ($p===$page)
+            ? "<strong>{$p}</strong>"
+            : "<a href=\"?part=news{$termSuffix}&page={$p}\">{$p}</a>";
+    }
+    $gcms->assign('pagination', implode(' ', $links));
+
+    // استخراج لیست
+    $listQ = "
+        SELECT p.id, p.page_title, p.page_excerpt, p.page_pic, p.page_date, t.term_name
+          FROM gcms_pages p
+     LEFT JOIN gcms_relationships_page_term rpt ON rpt.page_id=p.id
+     LEFT JOIN gcms_term t ON t.term_id=rpt.term_id
+         WHERE {$baseFilter}
+      ORDER BY p.page_date DESC
+         LIMIT ?,?";
+    $stm   = mysqli_prepare($link, $listQ);
+    mysqli_stmt_bind_param($stm, 'ii', $offset, $per);
+    mysqli_stmt_execute($stm);
+    $resL  = mysqli_stmt_get_result($stm);
+    $news  = [];
+    while ($r = mysqli_fetch_assoc($resL)) {
+        $news[] = [
+            'id'      => (int)$r['id'],
+            'title'   => htmlspecialchars($r['page_title'], ENT_QUOTES, 'UTF-8'),
+            'excerpt' => $r['page_excerpt'] . ' …',
+            'pic'     => $r['page_pic'],
+            'date'    => jdate("l j F y", (int)$r['page_date']),
+            'group'   => $r['term_name'] ?? '',
+            'url'     => "?part=news&id={$r['id']}"
+        ];
+    }
+    $gcms->assign('news_list', $news);
+
+} else {
+    // نمایش جزئیات یک خبر
+    $newsId = (int)$_GET['id'];
+    $pageQ  = "
+      SELECT p.page_title, p.page_content, p.page_excerpt, p.page_date,
+             u.metauser_value AS author, p.comment_status, p.page_pic, t.term_name, t.term_id
+        FROM gcms_pages p
+   LEFT JOIN gcms_metauser u ON u.user_id=p.page_author AND u.metauser_key='first_name'
+   LEFT JOIN gcms_relationships_page_term rpt ON rpt.page_id=p.id
+   LEFT JOIN gcms_term t ON t.term_id=rpt.term_id
+       WHERE p.id=? AND p.page_type='news' AND p.page_status='publish'
+    ";
+    $stm = mysqli_prepare($link, $pageQ);
+    mysqli_stmt_bind_param($stm, 'i', $newsId);
+    mysqli_stmt_execute($stm);
+    $res= mysqli_stmt_get_result($stm);
+    if (!$row = mysqli_fetch_assoc($res)) {
+        echo "<script>window.location='?part=news';</script>";
+        exit;
+    }
+    // مقادیر را به Smarty اختصاص می‌دهیم
+    $gcms->assignMultiple([
+        'page_title'   => $row['page_title'],
+        'page_content' => $row['page_content'],
+        'page_excerpt' => $row['page_excerpt'] . ' …',
+        'page_pic'     => $row['page_pic'],
+        'page_date'    => jdate("l j F y", (int)$row['page_date']),
+        'page_author'  => $row['author'],
+        'news_group'   => $row['term_name'],
+        'news_group_url'=> "?part=news&term={$row['term_id']}",
+        'comment_open'=> $row['comment_status']==='open'
+    ]);
+
+    // واکشی و اختصاص کامنت‌های تأییدشده
+    if ($row['comment_status']==='open') {
+        $cQ  = "SELECT comment_author, comment_date, comment_content
+                  FROM gcms_comment
+                 WHERE page_id=? AND comment_approved='confirm'
+              ORDER BY comment_date ASC";
+        $stm = mysqli_prepare($link, $cQ);
+        mysqli_stmt_bind_param($stm, 'i', $newsId);
+        mysqli_stmt_execute($stm);
+        $resC= mysqli_stmt_get_result($stm);
+        $comments = [];
+        while ($c = mysqli_fetch_assoc($resC)) {
+            $comments[] = [
+                'author'  => $c['comment_author'],
+                'date'    => jdate("l j F y", (int)$c['comment_date']),
+                'content' => $c['comment_content']
+            ];
+        }
+        $gcms->assign('comments', $comments);
+    }
+
+    // فرم ارسال نظر در قالب Smarty قرار گرفته است
+}
+
+// در پایان قالب news.tpl را فراخوانی کنید
+$gcms->display('news.tpl');

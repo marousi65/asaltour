@@ -1,108 +1,82 @@
 <?php
-	//تست
-	$res_des = mysql_query("SELECT *  FROM `gcms_des` ",$link);
-	$i = 0;
-	$slct_des = "<option value='ch'>انتخاب کنید ...</option>";
-	while ($row_des = mysql_fetch_array($res_des)){
-	$slct_des = $slct_des ."<option value='$row_des[id]'>$row_des[name]</option>";
-	$i++;
-	}
-	$gcms->assign('slct_des',$slct_des); 
-	
-	//
-	$res_sailing = mysql_query("SELECT *  FROM `gcms_sailing` ",$link);
-	$i = 0;
-	$slct_sailing = "<option value='all'>تمام کشتیرانیها</option>";
-	while ($row_des = mysql_fetch_array($res_sailing)){
-	$slct_sailing = $slct_sailing ."<option value='$row_des[id]'>$row_des[name]</option>";
-	$i++;
-	}
-	$gcms->assign('slct_sailing',$slct_sailing); 
-	//
-	$sel_sal = array(1 => 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند');
-	if (!$_SESSION['g_s_m']){
-	switch (jdate("m")){
+declare(strict_types=1);
 
-		case "&#1776;&#1777;":
-		$s_m = 1;
-		break;
-		
-		case "&#1776;&#1778;":
-		$s_m = 2;
-		break;
-		
-		case "&#1776;&#1779;":
-		$s_m = 3;
-		break;
-		
-		case "&#1776;&#1780;":
-		$s_m = 4;
-		break;
-		
-		case "&#1776;&#1781;":
-		$s_m = 5;
-		break;
-		
-		case "&#1776;&#1782;":
-		$s_m = 6;
-		break;
-		
-		case "&#1776;&#1783;":
-		$s_m = 7;
-		break;
-		
-		case "&#1776;&#1784;":
-		$s_m = 8;
-		break;
-		
-		case "&#1776;&#1785;":
-		$s_m = 9;
-		break;
-		
-		case "&#1777;&#1776;":
-		$s_m = 10;
-		break;
-		
-		case "&#1777;&#1777;":
-		$s_m = 11;
-		break;
-		
-		case "&#1777;&#1778;":
-		$s_m = 12;
-		break;
-		
-	}
-	$_SESSION['g_s_m'] = $s_m;
-	}else{
-	$s_m = $_SESSION['g_s_m'] ;
-	}
-	
-	for ($i = $s_m ; $i <= 6; $i++) {
-    $s_trx = $s_trx . "<option value='$i'>&#1777;&#1779;&#1785;&#1780; - $sel_sal[$i]</option>" ;
-	}
+namespace GCMS\File;
 
-	for ($i = 1 ; $i <= $s_m-1; $i++) {
-    $s_trx = $s_trx . "<option value='$i'>&#1777;&#1779;&#1785;&#1780; - $sel_sal[$i]</option>" ;
-	}
-	//////////////////////////////////////////////////////////////////
-	///////////////// بین کامنت ها در آخر سال گذاشته می شود و بعد از خرداد کامنت می شود
-	$s_trx = "
-	<option value='1'".(jdate('n') == 1 ? " selected":"").">".jdate('Y')." - فروردین</option>
-	<option value='2'".(jdate('n') == 2 ? " selected":"").">".jdate('Y')." - اردیبهشت</option>
-	<option value='3'".(jdate('n') == 3 ? " selected":"").">".jdate('Y')." - خرداد</option>
-	<option value='4'".(jdate('n') == 4 ? " selected":"").">".jdate('Y')." - تیر</option>
-	<option value='5'".(jdate('n') == 5 ? " selected":"").">".jdate('Y')." - مرداد</option>
-	<option value='6'".(jdate('n') == 6 ? " selected":"").">".jdate('Y')." - شهریور</option>
-	<option value='7'".(jdate('n') == 7 ? " selected":"").">".jdate('Y')." - مهر</option>
-	<option value='8'".(jdate('n') == 8 ? " selected":"").">".jdate('Y')." - آبان</option>
-	<option value='9'".(jdate('n') == 9 ? " selected":"").">".jdate('Y')." - آذر</option>
-	<option value='10'".(jdate('n') == 10 ? " selected":"").">".jdate('Y')." - دی</option>
-	<option value='11'".(jdate('n') == 11 ? " selected":"").">".jdate('Y')." - بهمن</option>
-	<option value='12'".(jdate('n') == 12 ? " selected":"").">".jdate('Y')." - اسفند</option>
-	
-	";
-///////////////////////////////////////////////////////////////////////
-	$gcms->assign('s_trx',$s_trx); 
+use Smarty;
 
-?>	
+// بارگذاری تنظیمات و توابع
+require_once __DIR__ . '/../../gconfig.php';
+require_once __DIR__ . '/../../jdf.php';
 
+global $gcms, $link;
+
+// --- استخراج مقادیر دلخواه از ورودی یا سشن ---
+$selDest   = filter_input(INPUT_GET, 'des', FILTER_VALIDATE_INT)     ?: null;
+$selSail   = filter_input(INPUT_GET, 'sailing', FILTER_VALIDATE_INT) ?: null;
+$selMonth  = filter_input(INPUT_GET, 'month', FILTER_VALIDATE_INT)   ?: (int) ($_SESSION['g_s_m'] ?? 0);
+
+// اگر سشن ماه تنظیم نشده، مقدار پیش‌فرض jdate استخراج شده و در سشن ذخیره می‌شود
+if ($selMonth < 1 || $selMonth > 12) {
+    $jm = jdate('n');
+    $_SESSION['g_s_m'] = $jm;
+    $selMonth = $jm;
+}
+
+// --- لیست مقاصد ---
+$stmt = mysqli_prepare(
+    $link,
+    "SELECT `id`,`name` 
+       FROM `gcms_des`
+      ORDER BY `name` ASC"
+);
+mysqli_stmt_execute($stmt);
+$res = mysqli_stmt_get_result($stmt);
+$optDes  = ['<option value="">انتخاب مقصد …</option>'];
+while ($row = mysqli_fetch_assoc($res)) {
+    $selected = ($selDest === (int)$row['id']) ? ' selected' : '';
+    $optDes[] = sprintf(
+        "<option value=\"%d\"%s>%s</option>",
+        $row['id'],
+        $selected,
+        htmlspecialchars($row['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+    );
+}
+$gcms->assign('opt_des', implode("\n", $optDes));
+
+// --- لیست شرکت‌های کشتیرانی ---
+$stmt = mysqli_prepare(
+    $link,
+    "SELECT `id`,`name`
+       FROM `gcms_sailing`
+      ORDER BY `name` ASC"
+);
+mysqli_stmt_execute($stmt);
+$res = mysqli_stmt_get_result($stmt);
+$optSail = ['<option value="">تمام کشتیرانی‌ها</option>'];
+while ($row = mysqli_fetch_assoc($res)) {
+    $selected = ($selSail === (int)$row['id']) ? ' selected' : '';
+    $optSail[] = sprintf(
+        "<option value=\"%d\"%s>%s</option>",
+        $row['id'],
+        $selected,
+        htmlspecialchars($row['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+    );
+}
+$gcms->assign('opt_sailing', implode("\n", $optSail));
+
+// --- لیست ماه‌های شمسی (با چرخش از خرداد تا اردیبهشت) ---
+$months = [
+    1=>'فروردین',2=>'اردیبهشت',3=>'خرداد',4=>'تیر',5=>'مرداد',6=>'شهریور',
+    7=>'مهر',8=>'آبان',9=>'آذر',10=>'دی',11=>'بهمن',12=>'اسفند'
+];
+$optionsMonth = [];
+for ($i = $selMonth; $i<=12; $i++) {
+    $sel = ($i === $selMonth) ? ' selected' : '';
+    $optionsMonth[] = "<option value=\"$i\"$sel>{$months[$i]}</option>";
+}
+for ($i = 1; $i<$selMonth; $i++) {
+    $sel = ($i === $selMonth) ? ' selected' : '';
+    $optionsMonth[] = "<option value=\"$i\"$sel>{$months[$i]}</option>";
+}
+$gcms->assign('opt_month', implode("\n", $optionsMonth));

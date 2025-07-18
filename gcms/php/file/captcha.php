@@ -1,19 +1,29 @@
 <?php
-session_start(); 
-$text = rand(10000,99999); 
-$_SESSION["vercode"] = $text; 
-$height = 25; 
-$width = 65; 
- 
-$image_p = imagecreate($width, $height); 
-$black = imagecolorallocate($image_p, 0, 0, 0); 
-$white = imagecolorallocate($image_p, 255, 255, 255);
-$font_size = 14; 
- 
-imagestring($image_p, $font_size, 5, 5, $text, $white); 
-imagejpeg($image_p, null, 80); 
-	
-	
+// /gcms/php/file/captcha.php
+declare(strict_types=1);
+session_start();
 
+// تولید کد CAPTCHA
+$chars = 'ABCDEFGHJKLMNPRSTUVWXYZ23456789';
+$code  = substr(str_shuffle($chars), 0, 6);
+$_SESSION['captcha_code'] = $code;
 
-?>
+// ساخت تصویر
+$width  = 120;
+$height = 40;
+$im     = imagecreatetruecolor($width, $height);
+$bg     = imagecolorallocate($im, 255,255,255);
+$fg     = imagecolorallocate($im,   0,  0,  0);
+imagefilledrectangle($im,0,0,$width,$height,$bg);
+
+// اگر فونت TTF دارید:
+$fontFile = __DIR__.'/../fonts/arial.ttf';
+if (file_exists($fontFile)) {
+    imagettftext($im, 20, 0, 10, 30, $fg, $fontFile, $code);
+} else {
+    imagestring($im, 5, 35, 10, $code, $fg);
+}
+
+header('Content-Type: image/png');
+imagepng($im);
+imagedestroy($im);

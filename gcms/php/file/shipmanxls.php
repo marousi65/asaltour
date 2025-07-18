@@ -1,572 +1,98 @@
-<meta http-equiv="content-type" content="text/html;charset=utf-8" />
-<body style=" font-family:tahoma; direction:rtl" >
-<?php // تست
-error_reporting(E_ALL ^ E_NOTICE);
-require $_SERVER['DOCUMENT_ROOT'].'/gcms/php/file/gconfig.php';
-require $_SERVER['DOCUMENT_ROOT'].'/gcms/php/file/adminfunc.php';
+<?php
+declare(strict_types=1);
+session_start();
 
-switch ($_GET['list']){
+// بارگذاری تنظیمات پایه
+require_once __DIR__ . '/gconfig.php';
 
-	case "psngrtrade":
+$list = $_GET['list'] ?? '';
+$id   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-//کوئری
-	$q_page_l = "SELECT * FROM `gcms_psngrtrade`
-	INNER JOIN `gcms_sailing` AS sailing ON `gcms_psngrtrade`.`id_sailing` = `sailing`.`id`
-	INNER JOIN `gcms_des` AS mabd ON `gcms_psngrtrade`.`id_mabd` = `mabd`.`id`
-	INNER JOIN `gcms_des` AS magh ON `gcms_psngrtrade`.`id_magh` = `magh`.`id`
-	ORDER BY `gcms_psngrtrade`.`id` DESC	";
-//نتایج
-	$res_1 = mysql_query($q_page_l,$link);
+// بر اساس نوع گزارش، کوئری و نام فایل را تنظیم می‌کنیم
+switch ($list) {
+    case 'psngrtrade':
+        $sql      = "
+          SELECT p.*, 
+                 mabd.title AS origin, 
+                 magh.title AS destination 
+          FROM `gcms_psngrtrade` p
+          JOIN `gcms_des` mabd ON p.`id_mabd` = mabd.`id`
+          JOIN `gcms_des` magh ON p.`id_magh` = magh.`id`
+          WHERE p.`id_login` = {$_SESSION['g_id_login']}";
+        $filename = 'reportpsngrtrade.xls';
+        break;
 
-	$i = 0;
-	$shipman_content =
-	"
-	<table id='hor-minimalist-a' >
-	<thead>
-	<tr>
-		<td>
-		<center>
-		<b>مبدا</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>مقصد</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>نام کشتیرانی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>تاریخ</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>ساعت حرکت</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>ظرفیت</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>ظرفیت خالی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>وضعیت</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>قیمت بلیط</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>قیمت چارتر</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>نام کشتی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>اطلاعات کشتی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>مدت زمان سفر</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>سرعت کشتی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>پیغام -1 </b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>پیغام -2</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>پیغام -3</b>
-		</center>
-		</td>
-	</tr>
-	</thead>
-	<tbody>
-	";
-	while ($row_1 = mysql_fetch_array($res_1)){
-	if ($row_1[type] == "active"){
-	$ac_li = "درحال فروش بلیط";
-	}else{
-		if ($row_1[type] == "close"){
-		$ac_li = "بسته";
-		}else{
-		$ac_li = "غیر فعال";
-		}
-	}
+    case 'car':
+        $sql      = "
+          SELECT * 
+          FROM `gcms_car` 
+          WHERE `id_login` = {$_SESSION['g_id_login']}";
+        $filename = 'reportcar.xls';
+        break;
 
-	$shipman_content = $shipman_content . "
-	<tr>
-		<td>
-		<center>
-		$row_1[22]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[24]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[20]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[5]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[6]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[7]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[8]
-		</center>
-		</td>
-		<td>
-		<center>
-		$ac_li
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[11]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[12]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[13]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[14]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[9]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[10]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[16]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[17]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[18]
-		</center>
-		</td>
-	</tr>
-	
-	";
-	$i++;
-	}
-	$shipman_content = $shipman_content .
-	"
-	</tbody>
-	</table>
-	";
-	
-	echo $shipman_content;
-	$filename ="report".$_GET['list'].".xls";
-	header('Content-type: application/ms-excel');
-	header('Content-Disposition: attachment; filename='.$filename);
-	break;
-	
-	
-	case "car":
+    case 'cartrade':
+        $sql      = "
+          SELECT p.*, 
+                 mabd.title AS origin, 
+                 magh.title AS destination 
+          FROM `gcms_cartrade` p
+          JOIN `gcms_des` mabd ON p.`id_mabd` = mabd.`id`
+          JOIN `gcms_des` magh ON p.`id_magh` = magh.`id`
+          WHERE p.`id_login` = {$_SESSION['g_id_login']}";
+        $filename = 'reportcartrade.xls';
+        break;
 
-//کوئری
-	$q_page_l = "SELECT * FROM `gcms_car` WHERE `id_login` = '$_REQUEST[id]' ";
-//نتایج
-	$res_1 = mysql_query($q_page_l,$link);
-
-	$i = 0;
-	$shipman_content =
-	"
-	<table id='hor-minimalist-a' >
-	<thead>
-	<tr>
-		<td>
-		<center>
-		<b>نام</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>تعداد واحد</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>قیمت بلیط</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>قیمت بار اضافه</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>حداکثر تعداد همراه</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>قیمت بلیط همراه</b>
-		</center>
-		</td>
-	</tr>
-	</thead>
-	<tbody>
-	";
-	while ($row_1 = mysql_fetch_array($res_1)){
-	
-	
-	$shipman_content = $shipman_content . "
-	<tr>
-		<td>
-		<center>
-		$row_1[name]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[unit]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[fee]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[cargo_fee]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[max_cap] نفر
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[fee_cap]
-		</center>
-		</td>
-	</tr>
-	
-	";
-	$i++;
-	}
-	$shipman_content = $shipman_content .
-	"
-	</tbody>
-	</table>
-	";
-	
-	echo $shipman_content;
-	$filename ="report".$_GET['list'].".xls";
-	header('Content-type: application/ms-excel');
-	header('Content-Disposition: attachment; filename='.$filename);
-	break;
-	
-	
-	
-	case "cartrade":
-	if ($_REQUEST[id]){
-//کوئری
-	$q_page_l = "SELECT * FROM `gcms_cartrade`
-	INNER JOIN `gcms_sailing` AS sailing ON `gcms_cartrade`.`id_sailing` = `sailing`.`id`
-	INNER JOIN `gcms_des` AS mabd ON `gcms_cartrade`.`id_mabd` = `mabd`.`id`
-	INNER JOIN `gcms_des` AS magh ON `gcms_cartrade`.`id_magh` = `magh`.`id`
-	WHERE `id_login` = '$_REQUEST[id]' 
-	ORDER BY `gcms_cartrade`.`id` DESC";
-//نتایج
-	$res_1 = mysql_query($q_page_l,$link);
-
-	$i = 0;
-	$shipman_content =
-	"
-	<table id='hor-minimalist-a' >
-	<thead>
-	<tr>
-		<td>
-		<center>
-		<b>مبدا</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>مقصد</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>نام کشتیرانی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>تاریخ</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>ساعت حرکت</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>ظرفیت</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>ظرفیت خالی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>وضعیت</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>قیمت چارتر</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>نام کشتی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>اطلاعات کشتی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>مدت زمان سفر</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>سرعت کشتی</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>پیغام -1 </b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>پیغام -2</b>
-		</center>
-		</td>
-		<td>
-		<center>
-		<b>پیغام -3</b>
-		</center>
-		</td>
-	</tr>
-	</thead>
-	<tbody>
-	";
-	while ($row_1 = mysql_fetch_array($res_1)){
-	if ($row_1[type] == "active"){
-	$ac_li = "درحال فروش بلیط";
-	}else{
-		if ($row_1[type] == "close"){
-		$ac_li = "بسته شده ";
-		}else{
-		$ac_li = "غیر فعال";
-		}
-	}
-	
-	if ($row_1[7] == $row_1[8]){
-	$edsh = "
-		<a href='?part=shipman&shipman=edit&edit=cartrade&id=$row_1[0]' >ویرایش</a><br>
-	";
-	}else{
-		if ($row_1[type] == "close") {
-		$edsh = "
-			<a href='?part=shipman&shipman=list&list=cartrade&chngact=$row_1[type]&id=$row_1[0]' >فروش آزاد</a><br>
-		";
-		}else{
-		$edsh = "
-			<a href='?part=shipman&shipman=list&list=cartrade&chngact=$row_1[type]&id=$row_1[0]' >توقف فروش</a><br>
-		";
-		}
-	}
-	
-	$shipman_content = $shipman_content . "
-	<tr>
-		<td>
-		<center>
-		$row_1[22]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[24]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[20]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[5]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[6]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[7]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[8]
-		</center>
-		</td>
-		<td>
-		<center>
-		$ac_li
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[11]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[12]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[13]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[9]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[10]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[15]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[16]
-		</center>
-		</td>
-		<td>
-		<center>
-		$row_1[17]
-		</center>
-		</td>
-	</tr>
-	
-	";
-	$i++;
-	}
-	$shipman_content = $shipman_content .
-	"
-	</tbody>
-	</table>
-	";
-	
-	echo $shipman_content;
-	$filename ="report".$_GET['list'].".xls";
-	header('Content-type: application/ms-excel');
-	header('Content-Disposition: attachment; filename='.$filename);
-	}
-	break;
-	
-	
-
-	default:
-	//
+    default:
+        exit('Invalid report type.');
 }
 
+// اجرای کوئری
+$res = mysql_query($sql, $link);
 
-?>
+// هدر برای اکسل
+header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+header("Content-Disposition: attachment; filename=\"{$filename}\"");
+echo "\xEF\xBB\xBF"; // BOM UTF-8
 
+// ساخت جدول خروجی
+echo "<table border='1'><tr>";
 
-</body>
+// تیتر ستون‌ها
+if ($list === 'psngrtrade' || $list === 'cartrade') {
+    echo "<th>مبدا</th><th>مقصد</th><th>نام کشتی</th><th>تاریخ</th>"
+       . "<th>ساعت</th><th>ظرفیت</th><th>ظرفیت خالی</th><th>وضعیت</th><th>درصد کنسلی</th>";
+}
+else { // car
+    echo "<th>نام</th><th>تعداد واحد</th><th>قیمت بلیط</th>"
+       . "<th>قیمت بار اضافه</th><th>حداکثر همراه</th><th>قیمت بلیط همراه</th>";
+}
+
+echo "</tr>";
+
+// ردیف‌ها
+while ($row = mysql_fetch_assoc($res)) {
+    echo "<tr>";
+    if ($list === 'psngrtrade' || $list === 'cartrade') {
+        echo "<td>{$row['origin']}</td>"
+           . "<td>{$row['destination']}</td>"
+           . "<td>{$row['ship_name']}</td>"
+           . "<td>{$row['date']}</td>"
+           . "<td>{$row['hour']}</td>"
+           . "<td>{$row['capacity']}</td>"
+           . "<td>{$row['free_capacity']}</td>"
+           . "<td>{$row['type']}</td>"
+           . "<td>{$row['darsad_cancel']}</td>";
+    }
+    else {
+        echo "<td>{$row['name']}</td>"
+           . "<td>{$row['unit']}</td>"
+           . "<td>{$row['fee']}</td>"
+           . "<td>{$row['cargo_fee']}</td>"
+           . "<td>{$row['max_cap']}</td>"
+           . "<td>{$row['fee_cap']}</td>";
+    }
+    echo "</tr>";
+}
+
+echo "</table>";
+exit;

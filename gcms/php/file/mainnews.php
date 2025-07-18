@@ -1,38 +1,43 @@
 <?php
+declare(strict_types=1);
 
-// پیدا کردن خبرها///////////////////////////////////////////////////////////////////////
-//کوئری
-	
-	$count_home_news = $configset[newsmainnum];
-	$query_news = "SELECT * FROM `gcms_pages` WHERE page_status = 'publish' AND page_parent = '0' AND page_type = 'news' ORDER BY `gcms_pages`.`page_date` DESC LIMIT 0 , $count_home_news";
-//نتایج
-	$result_news = mysql_query($query_news,$link);
-//سطر ها
-	$i = 0;
-	while ($row_news = mysql_fetch_array($result_news)){
-		
-		$smalis_news_title[$i] = $row_news['page_title'];
-		$smalis_news_pic[$i] = $row_news['page_pic'];
-		$smalis_news_excerpt[$i] = $row_news['page_excerpt']. "...";
-		$smalis_news_url[$i] = "?part=news&id=".$row_news['id'];
-		$smalis_news_date[$i] = jdate("l j  F  y ",$row_page['page_date']);
+namespace GCMS\File;
 
+use Smarty;
 
-		$i++;
-	
-	}
+// بارگذاری تنظیمات و توابع تاریخ
+require_once __DIR__ . '/../../gconfig.php';
+require_once __DIR__ . '/../../jdf.php';
 
-// پیدا کردن خبرها///////////////////////////////////////////////////////////////////////
+global $gcms, $link;
 
-////////////ارسال های سایدبار اخبار ////////////////////////////////////////////////////////			
+// تعداد اخبار نمایشی در صفحه اصلی
+$countHomeNews = (int) ($configset['newsmainnum'] ?? 5);
 
-			$gcms->assign('smalis_news_title',$smalis_news_title); 
-			$gcms->assign('smalis_news_pic',$smalis_news_pic); 
-			$gcms->assign('smalis_news_excerpt',$smalis_news_excerpt); 
-			$gcms->assign('smalis_news_url',$smalis_news_url); 
-			$gcms->assign('smalis_news_date',$smalis_news_date); 
-			
-	
-	
+// کوئری با Prepared Statement
+$query  = "SELECT id, page_title, page_pic, page_excerpt, page_date
+           FROM `gcms_pages`
+           WHERE page_status = 'publish'
+             AND page_parent = 0
+             AND page_type   = 'news'
+           ORDER BY page_date DESC
+           LIMIT ?";
+$stmt   = mysqli_prepare($link, $query);
+mysqli_stmt_bind_param($stmt, 'i', $countHomeNews);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 
-?>
+// جمع‌آوری نتایج
+$smalis_news = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $smalis_news[] = [
+        'title'   => htmlspecialchars($row['page_title'], ENT_QUOTES, 'UTF-8'),
+        'pic'     => $row['page_pic'],
+        'excerpt' => $row['page_excerpt'] . '...',
+        'url'     => "?part=news&id={$row['id']}",
+        'date'    => jdate("l j F y", (int) $row['page_date']),
+    ];
+}
+
+// اختصاص آرایه‌ی اخبار به Smarty
+$gcms->assign('smalis_news', $smalis_news);

@@ -1,17 +1,19 @@
 <?php
-if ($pluginsetup[poll]){
+declare(strict_types=1);
+session_start();
 
-if ( !$pollmessage ){
+// تنظیمات کلی
+require_once __DIR__ . '/gconfig.php';
+// اگر تقویم شمسی لازم دارید:
+// require_once __DIR__ . '/jdf.php';
 
-require $_SERVER['DOCUMENT_ROOT'].'/gcms/php/file/mainpoll.php';
-	}		
-			$gcms->display("index/index.tpl");
-	
-}else {
-	echo "
-		<script>
-		window.location='?part=page&id=$configset[first_page]';
-		</script>
-	";
-}
-?>
+// منطق نمایش نظرسنجی (poll)
+// …
+// مثلاً:
+// if (isset($_POST['vote'])) { /* ثبت رأی */ }
+// $gcms->assign('options', $options);
+// $gcms->assign('results', $results);
+
+$gcms->assign('menu_active', "?part=poll");
+$gcms->assign('part',        "poll");
+$gcms->display("index/index.tpl");

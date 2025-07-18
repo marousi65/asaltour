@@ -1,573 +1,384 @@
 <?php
-/*
-Jalali Date function by Milad Rastian (miladmovie AT yahoo DOT com)
+declare(strict_types=1);
 
-//The main function which convert Gregorian to Jalali calendars is:
-// Copyright (C) 2000  Roozbeh Pournader and Mohammad Toossi 
-//you can see complete note of those function in down of the page
+/**
+ * کتابخانه تبدیل تاریخ شمسی – jdf.php
+ * نسخهٔ اصلاح‌شده با strict types و حذف echo‌های ناخواسته
+ */
 
-		AND JALAI DATE FUNCTION
-this function is simillar than date function in PHP
-you can find more about it in http://jdf.farsiprojects.com
-		Copyright (C)2003 FARSI PROJECTS GROUP
-
-         //   //\\           //        //\\           //          //////
-        //   //  \\         //        //  \\         //            //
-       //   //    \\       //        //    \\       //            //
-  \\  //   /////\\\\\     //        /////\\\\\     //            //
-   \\//   //        \\   ///////   //        \\   //////////   /////
-
-    ///////      //\\         //////   //////// 
-   //     //    //  \\         //     //
-  //     //    //    \\       //     ///////
- //     //    /////\\\\\     //     //
-////////     //        \\   //     /////////  
-
-*/
-
-
-function jdate2($type,$maket="now")
+/**
+ * تبدیل تاریخ میلادی به رشتهٔ قالب‌بندی‌شدهٔ شمسی (مشابه date)
+ *
+ * @param string       $format   قالب‌بندی (مثل "Y-m-d H:i:s")
+ * @param int|string   $maket    timestamp یا "now"
+ * @return string
+ */
+function jdate(string $format, $maket = 'now'): string
 {
-	//set 1 if you want translate number to farsi or if you don't like set 0
-	$transnumber=0;
-	///chosse your timezone
-	$TZhours=3;
-	$TZminute=30;
-	$need="";
-	$result1="";
-	$result="";
-	if($maket=="now"){
-		$year=date("Y");
-		$month=date("m");
-		$day=date("d");
-		list( $jyear, $jmonth, $jday ) = gregorian_to_jalali2($year, $month, $day);
-		$maket=mktime(date("H")+$TZhours,date("i")+$TZminute,date("s"),date("m"),date("d"),date("Y"));
-	}else{
-		//$maket=0;
-		$maket+=$TZhours*3600+$TZminute*60;
-		$date=date("Y-m-d",$maket);
-		list( $year, $month, $day ) = preg_split ( '/-/', $date );
+    // اگر خواستید ترجمهٔ ارقام به فارسی باشد، این را true کنید:
+    $transnumber = false;
 
-		list( $jyear, $jmonth, $jday ) = gregorian_to_jalali2($year, $month, $day);
-		}
+    // تنظیمات منطقهٔ زمانی شمسی
+    $TZhours   = 3;
+    $TZminutes = 30;
 
-	$need= $maket;
-	$year=date("Y",$need);
-	$month=date("m",$need);
-	$day=date("d",$need);
-	$i=0;
-	$subtype="";
-	$subtypetemp="";
-	list( $jyear, $jmonth, $jday ) = gregorian_to_jalali2($year, $month, $day);
-	while($i<strlen($type))
-	{
-		$subtype=substr($type,$i,1);
-		if($subtypetemp=="\\")
-		{
-			$result.=$subtype;
-			$i++;
-			continue;
-		}
-		
-		switch ($subtype)
-		{
+    // تعیین timestamp نهایی
+    if ($maket === 'now') {
+        $time = time() + $TZhours * 3600 + $TZminutes * 60;
+    } else {
+        $time = (int)$maket + $TZhours * 3600 + $TZminutes * 60;
+    }
 
-			case "A":
-				$result1=date("a",$need);
-				if($result1=="pm") $result.= "&#1576;&#1593;&#1583;&#1575;&#1586;&#1592;&#1607;&#1585;";
-				else $result.="&#1602;&#1576;&#1604;&#8207;&#1575;&#1586;&#1592;&#1607;&#1585;";
-				break;
+    // تاریخ میلادی
+    $gy = (int)date('Y', $time);
+    $gm = (int)date('m', $time);
+    $gd = (int)date('d', $time);
 
-			case "a":
-				$result1=date("a",$need);
-				if($result1=="pm") $result.= "&#1576;&#46;&#1592;";
-				else $result.="&#1602;&#46;&#1592;";
-				break;
-			case "d":
-				if($jday<10)$result1="0".$jday;
-				else 	$result1=$jday;
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "D":
-				$result1=date("D",$need);
-				if($result1=="Thu") $result1="&#1662;";
-				else if($result1=="Sat") $result1="&#1588;";
-				else if($result1=="Sun") $result1="&#1609;";
-				else if($result1=="Mon") $result1="&#1583;";
-				else if($result1=="Tue") $result1="&#1587;";
-				else if($result1=="Wed") $result1="&#1670;";
-				else if($result1=="Thu") $result1="&#1662;";
-				else if($result1=="Fri") $result1="&#1580;";
-				$result.=$result1;
-				break;
-			case"F":
-				$result.=monthname2($jmonth);
-				break;
-			case "g":
-				$result1=date("g",$need);
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "G":
-				$result1=date("G",$need);
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-				case "h":
-				$result1=date("h",$need);
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "H":
-				$result1=date("H",$need);
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "i":
-				$result1=date("i",$need);
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "j":
-				$result1=$jday;
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "l":
-				$result1=date("l",$need);
-				if($result1=="Saturday") $result1="&#1588;&#1606;&#1576;&#1607;";
-				else if($result1=="Sunday") $result1="&#1610;&#1603;&#1588;&#1606;&#1576;&#1607;";
-				else if($result1=="Monday") $result1="&#1583;&#1608;&#1588;&#1606;&#1576;&#1607;";
-				else if($result1=="Tuesday") $result1="&#1587;&#1607;&#32;&#1588;&#1606;&#1576;&#1607;";
-				else if($result1=="Wednesday") $result1="&#1670;&#1607;&#1575;&#1585;&#1588;&#1606;&#1576;&#1607;";
-				else if($result1=="Thursday") $result1="&#1662;&#1606;&#1580;&#1588;&#1606;&#1576;&#1607;";
-				else if($result1=="Friday") $result1="&#1580;&#1605;&#1593;&#1607;";
-				$result.=$result1;
-				break;
-			case "m":
-				if($jmonth<10) $result1="0".$jmonth;
-				else	$result1=$jmonth;
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "M":
-				$result.=short_monthname2($jmonth);
-				break;
-			case "n":
-				$result1=$jmonth;
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "s":
-				$result1=date("s",$need);
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "S":
-				$result.="&#1575;&#1605;";
-				break;
-			case "t":
-				$result.=lastday2 ($month,$day,$year);
-				break;
-			case "w":
-				$result1=date("w",$need);
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "y":
-				$result1=substr($jyear,2,4);
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;
-			case "Y":
-				$result1=$jyear;
-				if($transnumber==1) $result.=Convertnumber2farsi2($result1);
-				else $result.=$result1;
-				break;		
-			case "U" :
-				$result.=mktime();
-				break;
-			case "Z" :
-				$result.=days_of_year2($jmonth,$jday,$jyear);
-				break;
-			case "L" :
-				list( $tmp_year, $tmp_month, $tmp_day ) = jalali_to_gregorian2(1384, 12, 1);
-				echo $tmp_day;
-				/*if(lastday2($tmp_month,$tmp_day,$tmp_year)=="31")
-					$result.="1";
-				else 
-					$result.="0";
-					*/
-				break;
-			default:
-				$result.=$subtype;
-		}
-		$subtypetemp=substr($type,$i,1);
-	$i++;
-	}
-	return $result;
+    // تبدیل به شمسی
+    [$jy, $jm, $jd] = gregorian_to_jalali($gy, $gm, $gd);
+
+    $result      = '';
+    $escapeNext  = false;
+    $len         = mb_strlen($format, 'UTF-8');
+
+    for ($i = 0; $i < $len; $i++) {
+        $char = mb_substr($format, $i, 1, 'UTF-8');
+        if ($escapeNext) {
+            $result     .= $char;
+            $escapeNext = false;
+            continue;
+        }
+        if ($char === '\\') {
+            $escapeNext = true;
+            continue;
+        }
+        switch ($char) {
+            case 'd': // روز ۰۱–۳۱
+                $d      = $jd < 10 ? "0{$jd}" : (string)$jd;
+                $result .= $transnumber ? Convertnumber2farsi($d) : $d;
+                break;
+            case 'D': // روز هفته کوتاه
+                $w      = date('D', $time);
+                $mapD   = ['Sat'=>'ش','Sun'=>'ی','Mon'=>'د','Tue'=>'س','Wed'=>'چ','Thu'=>'پ','Fri'=>'ج'];
+                $result .= $mapD[$w] ?? $w;
+                break;
+            case 'j': // روز بدون صفر پیشوند
+                $d      = (string)$jd;
+                $result .= $transnumber ? Convertnumber2farsi($d) : $d;
+                break;
+            case 'l': // روز هفته کامل
+                $w      = date('l', $time);
+                $mapL   = [
+                    'Saturday'=>'شنبه','Sunday'=>'یک‌شنبه','Monday'=>'دوشنبه',
+                    'Tuesday'=>'سه‌شنبه','Wednesday'=>'چهارشنبه','Thursday'=>'پنج‌شنبه','Friday'=>'جمعه'
+                ];
+                $result .= $mapL[$w] ?? $w;
+                break;
+            case 'm': // ماه ۰۱–۱۲
+                $m      = $jm < 10 ? "0{$jm}" : (string)$jm;
+                $result .= $transnumber ? Convertnumber2farsi($m) : $m;
+                break;
+            case 'n': // ماه بدون صفر پیشوند
+                $result .= $transnumber ? Convertnumber2farsi((string)$jm) : $jm;
+                break;
+            case 'M': // نام ماه کوتاه
+                $result .= short_monthname($jm);
+                break;
+            case 'F': // نام کامل ماه
+                $result .= monthname($jm);
+                break;
+            case 'Y': // سال چهاررقمی
+                $result .= $transnumber ? Convertnumber2farsi((string)$jy) : $jy;
+                break;
+            case 'y': // سال دونقطه‌ای
+                $yy     = substr((string)$jy, 2, 2);
+                $result .= $transnumber ? Convertnumber2farsi($yy) : $yy;
+                break;
+            case 'H': // ساعت ۲۴ساعته با صفر پیشوند
+                $h      = date('H', $time);
+                $result .= $transnumber ? Convertnumber2farsi($h) : $h;
+                break;
+            case 'h': // ساعت ۱۲ساعته با صفر پیشوند
+                $h      = date('h', $time);
+                $result .= $transnumber ? Convertnumber2farsi($h) : $h;
+                break;
+            case 'i': // دقیقه
+                $i2     = date('i', $time);
+                $result .= $transnumber ? Convertnumber2farsi($i2) : $i2;
+                break;
+            case 's': // ثانیه
+                $s      = date('s', $time);
+                $result .= $transnumber ? Convertnumber2farsi($s) : $s;
+                break;
+            case 'a': // am/pm کوتاه
+                $ampm   = date('a', $time);
+                $result .= $ampm === 'pm' ? 'ب.ظ' : 'ق.ظ';
+                break;
+            case 'A': // AM/PM طولانی
+                $ampm   = date('a', $time);
+                $result .= $ampm === 'pm' ? 'بعدازظهر' : 'قبل‌ازظهر';
+                break;
+            case 'U': // timestamp
+                $result .= (string)time();
+                break;
+            case 'L': // کبیسه بودن سال شمسی
+                $result .= is_kabise($jy) ? '1' : '0';
+                break;
+            case 'z': // روز سال (از ۰)
+                $result .= (string)days_of_year($jm, $jd, $jy);
+                break;
+            default:
+                $result .= $char;
+        }
+    }
+    return $result;
 }
 
-
-
-function jmaketime2($hour="",$minute="",$second="",$jmonth="",$jday="",$jyear="")
+/**
+ * مبدل تاریخ شمسی به timestamp
+ */
+function jmaketime(int $hour = 0, int $minute = 0, int $second = 0, int $jmonth = 1, int $jday = 1, int $jyear = 1300): int
 {
-	if(!$hour && !$minute && !$second && !$jmonth && !$jmonth && !$jday && !$jyear)
-		return mktime();
-	list( $year, $month, $day ) = jalali_to_gregorian2($jyear, $jmonth, $jday);
-	$i=mktime($hour,$minute,$second,$month,$day,$year);	
-	return $i;
+    [$gy, $gm, $gd] = jalali_to_gregorian($jyear, $jmonth, $jday);
+    return mktime($hour, $minute, $second, $gm, $gd, $gy);
 }
 
-
-///Find num of Day Begining Of Month ( 0 for Sat & 6 for Sun)
-function mstart2($month,$day,$year)
+/**
+ * اولین روز هفتهٔ ماه (۰=شنبه … ۶=جمعه)
+ */
+function mstart(int $month, int $day, int $year): int
 {
-	list( $jyear, $jmonth, $jday ) = gregorian_to_jalali2($year, $month, $day);
-	list( $year, $month, $day ) = jalali_to_gregorian2($jyear, $jmonth, "1");
-	$timestamp=mktime(0,0,0,$month,$day,$year);
-	return date("w",$timestamp);
+    [$jy, $jm, $jd]     = gregorian_to_jalali($year, $month, $day);
+    [$gy, $gm, $gd]     = jalali_to_gregorian($jy, $jm, 1);
+    return (int)date('w', mktime(0, 0, 0, $gm, $gd, $gy));
 }
 
-//Find Number Of Days In This Month
-function lastday2 ($month,$day,$year)
+/**
+ * تعداد روزهای ماه شمسی داده‌شده
+ */
+function lastday(int $month, int $day, int $year): int
 {
-	$jday2="";
-	$jdate2 ="";
-	$lastday2en=date("d",mktime(0,0,0,$month+1,0,$year));
-	list( $jyear, $jmonth, $jday ) = gregorian_to_jalali2($year, $month, $day);
-	$lastdatep=$jday;
-	$jday=$jday2;
-	while($jday2!="1")
-	{
-		if($day<$lastday2en)
-		{
-			$day++;
-			list( $jyear, $jmonth, $jday2 ) = gregorian_to_jalali2($year, $month, $day);
-			if($jdate2=="1") break;
-			if($jdate2!="1") $lastdatep++;
-		}
-		else
-		{ 
-			$day=0;
-			$month++;
-			if($month==13) 
-			{
-					$month="1";
-					$year++;
-			}
-		}
+    $lastEn = (int)date('d', mktime(0, 0, 0, $month + 1, 0, $year));
+    [$jy, $jm, $jd] = gregorian_to_jalali($year, $month, $day);
 
-	}
-	return $lastdatep-1;
+    $count = 0;
+    $d     = 1;
+    while (true) {
+        [$gy, $gm, $gd] = jalali_to_gregorian($jy, $jm, $d);
+        if ($gd > $lastEn) {
+            break;
+        }
+        $count++;
+        $d++;
+    }
+    return $count;
 }
 
-//Find days in this year untile now 
-function days_of_year2($jmonth,$jday,$jyear)
+/**
+ * تعداد روزهای گذشته از ابتدای سال شمسی تا تاریخ داده‌شده
+ */
+function days_of_year(int $jmonth, int $jday, int $jyear): int
 {
-	$year="";
-	$month="";
-	$year="";
-	$result="";
-	if($jmonth=="01")
-		return $jday;
-	for ($i=1;$i<$jmonth || $i==12;$i++)
-	{
-		list( $year, $month, $day ) = jalali_to_gregorian2($jyear, $i, "1");
-		$result+=lastday2($month,$day,$year);
-	}
-	return $result+$jday;
+    $sum = 0;
+    for ($m = 1; $m < $jmonth; $m++) {
+        $sum += lastday(...jalali_to_gregorian($jyear, $m, 1));
+    }
+    return $sum + $jday;
 }
 
-//translate number of month to name of month
-function monthname2($month)
+/**
+ * نام کامل ماه شمسی
+ */
+function monthname(int $month): string
 {
-
-    if($month=="01") return "&#1601;&#1585;&#1608;&#1585;&#1583;&#1610;&#1606;";
-
-    if($month=="02") return "&#1575;&#1585;&#1583;&#1610;&#1576;&#1607;&#1588;&#1578;";
-
-    if($month=="03") return "&#1582;&#1585;&#1583;&#1575;&#1583;";
-
-    if($month=="04") return  "&#1578;&#1610;&#1585;";
-
-    if($month=="05") return "&#1605;&#1585;&#1583;&#1575;&#1583;";
-
-    if($month=="06") return "&#1588;&#1607;&#1585;&#1610;&#1608;&#1585;";
-
-    if($month=="07") return "&#1605;&#1607;&#1585;";
-
-    if($month=="08") return "&#1570;&#1576;&#1575;&#1606;";
-
-    if($month=="09") return "&#1570;&#1584;&#1585;";
-
-    if($month=="10") return "&#1583;&#1610;";
-
-    if($month=="11") return "&#1576;&#1607;&#1605;&#1606;";
-
-    if($month=="12") return "&#1575;&#1587;&#1601;&#1606;&#1583;";
+    $names = [
+        1=>'فروردین',2=>'اردیبهشت',3=>'خرداد',4=>'تیر',
+        5=>'مرداد',6=>'شهریور',7=>'مهر',8=>'آبان',
+        9=>'آذر',10=>'دی',11=>'بهمن',12=>'اسفند'
+    ];
+    return $names[$month] ?? '';
 }
 
-function short_monthname2($month)
+/**
+ * نام کوتاه ماه شمسی
+ */
+function short_monthname(int $month): string
 {
-
-    if($month=="01") return "&#1601;&#1585;&#1608;";
-
-    if($month=="02") return "&#1575;&#1585;&#1583;";
-
-    if($month=="03") return "&#1582;&#1585;&#1583;";
-
-    if($month=="04") return  "&#1578;&#1610;&#1585;";
-
-    if($month=="05") return "&#1605;&#1585;&#1583;";
-
-    if($month=="06") return "&#1588;&#1607;&#1585;";
-
-    if($month=="07") return "&#1605;&#1607;&#1585;";
-
-    if($month=="08") return "&#1570;&#1576;&#1575;";
-
-    if($month=="09") return "&#1570;&#1584;&#1585;";
-
-    if($month=="10") return "&#1583;&#1610;";
-
-    if($month=="11") return "&#1576;&#1607;&#1605;";
-
-    if($month=="12") return "&#1575;&#1587;&#1601; ";
+    $short = [
+        1=>'فرورد',2=>'اردی',3=>'خرد',4=>'تیر',
+        5=>'مردا',6=>'شهر',7=>'مهر',8=>'آبا',
+        9=>'آذر',10=>'دی',11=>'بهم',12=>'اسفن'
+    ];
+    return $short[$month] ?? '';
 }
 
-////here convert to  number in persian
-function Convertnumber2farsi2($srting) 
+/**
+ * تبدیل ارقام لاتین به فارسی
+ */
+function Convertnumber2farsi(string $str): string
 {
-	$num0="&#1776;";
-	$num1="&#1777;";
-	$num2="&#1778;";
-	$num3="&#1779;";
-	$num4="&#1780;";
-	$num5="&#1781;";
-	$num6="&#1782;";
-	$num7="&#1783;";
-	$num8="&#1784;";
-	$num9="&#1785;";
-	
-	$stringtemp="";
-	$len=strlen($srting);
-	for($sub=0;$sub<$len;$sub++)
-	{
-	 if(substr($srting,$sub,1)=="0")$stringtemp.=$num0;
-	 elseif(substr($srting,$sub,1)=="1")$stringtemp.=$num1;
-	 elseif(substr($srting,$sub,1)=="2")$stringtemp.=$num2;
-	 elseif(substr($srting,$sub,1)=="3")$stringtemp.=$num3;
-	 elseif(substr($srting,$sub,1)=="4")$stringtemp.=$num4;
-	 elseif(substr($srting,$sub,1)=="5")$stringtemp.=$num5;
-	 elseif(substr($srting,$sub,1)=="6")$stringtemp.=$num6;
-	 elseif(substr($srting,$sub,1)=="7")$stringtemp.=$num7;
-	 elseif(substr($srting,$sub,1)=="8")$stringtemp.=$num8;
-	 elseif(substr($srting,$sub,1)=="9")$stringtemp.=$num9;
-	 else $stringtemp.=substr($srting,$sub,1);
-
-	}
-return   $stringtemp;
-
-}///end conver to number in persian
-
-function is_kabise2($year)
-{
-	if($year%4==0 && $year%100!=0)
-		return true;
-	return false;
+    $map = ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴',
+            '5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹'];
+    return str_replace(array_keys($map), array_values($map), $str);
 }
 
-
-function jcheckdate2($month,$day,$year)
+/**
+ * بررسی کبیسه بودن سال شمسی
+ */
+function is_kabise(int $jy): bool
 {
-	$j_days_in_month = array(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29);
-	if($month<=12 && $month>0)
-	{
-		if($j_days_in_month[$month-1]>=$day && 	$day>0)
-			return 1;
-		if(is_kabise2($year))
-			echo "Asdsd";
-		if(is_kabise2($year) && $j_days_in_month[$month-1]==31)
-			return 1;
-	}
-	
-	return 0;
-		
+    // تقویم 33 ساله‌ی شمسی: سال‌هایی که باقیماندهٔ تقسیم بر 33 == 1 کبیسه‌اند
+    return ($jy % 33) % 4 === 1;
 }
 
-function jtime2()
+/**
+ * اعتبارسنجی تاریخ شمسی
+ */
+function jcheckdate(int $month, int $day, int $year): bool
 {
-	return mktime()	;
+    if ($month < 1 || $month > 12) {
+        return false;
+    }
+    $mdays = [31,31,31,31,31,31,30,30,30,30,30,29];
+    if ($day < 1 || $day > $mdays[$month - 1]) {
+        // اگر اسفند 30 و سال کبیسه باشد
+        if ($month === 12 && is_kabise($year) && $day === 30) {
+            return true;
+        }
+        return false;
+    }
+    return true;
 }
 
-function jgetdate2($timestamp="")
+/**
+ * timestamp کنونی
+ */
+function jtime(): int
 {
-	if($timestamp=="")
-		$timestamp=mktime();
-
-	return array(
-		0=>$timestamp,	
-		"seconds"=>jdate("s",$timestamp),
-		"minutes"=>jdate("i",$timestamp),
-		"hours"=>jdate("G",$timestamp),
-		"mday"=>jdate("j",$timestamp),
-		"wday"=>jdate("w",$timestamp),
-		"mon"=>jdate("n",$timestamp),
-		"year"=>jdate("Y",$timestamp),
-		"yday"=>days_of_year2(jdate("m",$timestamp),jdate("d",$timestamp),jdate("Y",$timestamp)),
-		"weekday"=>jdate("l",$timestamp),		
-		"month"=>jdate("F",$timestamp),
-	);
+    return time();
 }
 
-
-
-
-function div2($a,$b) {
-    return (int) ($a / $b);
+/**
+ * آرایهٔ تاریخ شمسی مشابه getdate
+ */
+function jgetdate(int $timestamp = 0): array
+{
+    if ($timestamp === 0) {
+        $timestamp = time();
+    }
+    return [
+        'seconds' => jdate('s', $timestamp),
+        'minutes' => jdate('i', $timestamp),
+        'hours'   => jdate('G', $timestamp),
+        'mday'    => jdate('j', $timestamp),
+        'wday'    => jdate('w', $timestamp),
+        'mon'     => jdate('n', $timestamp),
+        'year'    => jdate('Y', $timestamp),
+        'yday'    => days_of_year((int)jdate('n', $timestamp), (int)jdate('j', $timestamp), (int)jdate('Y', $timestamp)),
+        'weekday' => jdate('l', $timestamp),
+        'month'   => jdate('F', $timestamp),
+    ];
 }
 
-function gregorian_to_jalali2 ($g_y, $g_m, $g_d) 
+/**
+ * تبدیل میلادی به شمسی
+ * @return array [year, month, day]
+ */
+function gregorian_to_jalali(int $gy, int $gm, int $gd): array
 {
-    $g_days_in_month = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31); 
-    $j_days_in_month = array(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29);     
-    
+    $gDaysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
+    // بررسی کبیسهٔ میلادی
+    if ((($gy % 4 === 0 && $gy % 100 !== 0) || ($gy % 400 === 0))) {
+        $gDaysInMonth[1] = 29;
+    }
 
+    $gy2 = $gy - 1600;
+    $gm2 = $gm - 1;
+    $gd2 = $gd - 1;
 
-   
+    $gDayNo = 365 * $gy2 + (int)(($gy2 + 3) / 4) - (int)(($gy2 + 99) / 100) + (int)(($gy2 + 399) / 400);
+    for ($i = 0; $i < $gm2; $i++) {
+        $gDayNo += $gDaysInMonth[$i];
+    }
+    $gDayNo += $gd2;
 
-   $gy = $g_y-1600; 
-   $gm = $g_m-1; 
-   $gd = $g_d-1; 
+    $jDayNo = $gDayNo - 79;
+    $jNp    = (int)($jDayNo / 12053);
+    $jDayNo %= 12053;
 
-   $g_day_no = 365*$gy+div2($gy+3,4)-div2($gy+99,100)+div2($gy+399,400); 
+    $jy = 979 + 33 * $jNp + 4 * (int)($jDayNo / 1461);
+    $jDayNo %= 1461;
 
-   for ($i=0; $i < $gm; ++$i) 
-      $g_day_no += $g_days_in_month[$i]; 
-   if ($gm>1 && (($gy%4==0 && $gy%100!=0) || ($gy%400==0))) 
-      /* leap and after Feb */ 
-      $g_day_no++; 
-   $g_day_no += $gd; 
+    if ($jDayNo >= 366) {
+        $jy += (int)(($jDayNo - 1) / 365);
+        $jDayNo = ($jDayNo - 1) % 365;
+    }
 
-   $j_day_no = $g_day_no-79; 
+    $jDaysInMonth = [31,31,31,31,31,31,30,30,30,30,30,29];
+    for ($i = 0; $i < 11 && $jDayNo >= $jDaysInMonth[$i]; $i++) {
+        $jDayNo -= $jDaysInMonth[$i];
+    }
+    $jm = $i + 1;
+    $jd = $jDayNo + 1;
 
-   $j_np = div2($j_day_no, 12053); /* 12053 = 365*33 + 32/4 */ 
-   $j_day_no = $j_day_no % 12053; 
-
-   $jy = 979+33*$j_np+4*div2($j_day_no,1461); /* 1461 = 365*4 + 4/4 */ 
-
-   $j_day_no %= 1461; 
-
-   if ($j_day_no >= 366) { 
-      $jy += div2($j_day_no-1, 365); 
-      $j_day_no = ($j_day_no-1)%365; 
-   } 
-
-   for ($i = 0; $i < 11 && $j_day_no >= $j_days_in_month[$i]; ++$i) 
-      $j_day_no -= $j_days_in_month[$i]; 
-   $jm = $i+1; 
-   $jd = $j_day_no+1; 
-
-   return array($jy, $jm, $jd); 
-} 
-
-function jalali_to_gregorian2($j_y, $j_m, $j_d) 
-{ 
-    $g_days_in_month = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31); 
-    $j_days_in_month = array(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29);
-    
-   
-
-   $jy = $j_y-979; 
-   $jm = $j_m-1; 
-   $jd = $j_d-1; 
-
-   $j_day_no = 365*$jy + div2($jy, 33)*8 + div2($jy%33+3, 4); 
-   for ($i=0; $i < $jm; ++$i) 
-      $j_day_no += $j_days_in_month[$i]; 
-
-   $j_day_no += $jd; 
-
-   $g_day_no = $j_day_no+79; 
-
-   $gy = 1600 + 400*div2($g_day_no, 146097); /* 146097 = 365*400 + 400/4 - 400/100 + 400/400 */ 
-   $g_day_no = $g_day_no % 146097; 
-
-   $leap = true; 
-   if ($g_day_no >= 36525) /* 36525 = 365*100 + 100/4 */ 
-   { 
-      $g_day_no--; 
-      $gy += 100*div2($g_day_no,  36524); /* 36524 = 365*100 + 100/4 - 100/100 */ 
-      $g_day_no = $g_day_no % 36524; 
-
-      if ($g_day_no >= 365) 
-         $g_day_no++; 
-      else 
-         $leap = false; 
-   } 
-
-   $gy += 4*div2($g_day_no, 1461); /* 1461 = 365*4 + 4/4 */ 
-   $g_day_no %= 1461; 
-
-   if ($g_day_no >= 366) { 
-      $leap = false; 
-
-      $g_day_no--; 
-      $gy += div2($g_day_no, 365); 
-      $g_day_no = $g_day_no % 365; 
-   } 
-
-   for ($i = 0; $g_day_no >= $g_days_in_month[$i] + ($i == 1 && $leap); $i++) 
-      $g_day_no -= $g_days_in_month[$i] + ($i == 1 && $leap); 
-   $gm = $i+1; 
-   $gd = $g_day_no+1; 
-
-   return array($gy, $gm, $gd); 
+    return [$jy, $jm, $jd];
 }
 
-// day in persian by Bahman Reshadi  
-function dip2()
+/**
+ * تبدیل شمسی به میلادی
+ * @return array [year, month, day]
+ */
+function jalali_to_gregorian(int $jy, int $jm, int $jd): array
 {
- $englishday = date("l");
-	switch ($englishday)
-		{
+    $jDaysInMonth = [31,31,31,31,31,31,30,30,30,30,30,29];
 
-				case "Saturday":
-					$persianday = "شنبه";
-				break;
-				
-				case "Sunday":
-					$persianday = "یک شنبه";
-				break;
-				
-				case "Monday":
-					$persianday = "دوشنبه";
-				break;
-				
-				case "Tuesday":
-					$persianday = "سه شنبه";
-				break;
-				
-				case "Wednesday":
-					$persianday = "چهارشنبه";
-				break;
-				
-				case "Thursday":
-					$persianday = "پنجشنبه";
-				break;
-				
-				case "Friday":
-					$persianday = "جمعه";
-				break;
-				
-				
-		}
-		return $persianday;
-		}
+    $jy2 = $jy - 979;
+    $jm2 = $jm - 1;
+    $jd2 = $jd - 1;
 
+    $jDayNo = 365 * $jy2 + (int)($jy2 / 33) * 8 + (int)((($jy2 % 33) + 3) / 4);
+    for ($i = 0; $i < $jm2; $i++) {
+        $jDayNo += $jDaysInMonth[$i];
+    }
+    $jDayNo += $jd2;
 
+    $gDayNo = $jDayNo + 79;
+    $gy     = 1600 + 400 * (int)($gDayNo / 146097);
+    $gDayNo %= 146097;
 
+    $leap = true;
+    if ($gDayNo >= 36525) {
+        $gDayNo--;
+        $gy     += 100 * (int)($gDayNo / 36524);
+        $gDayNo %= 36524;
+        if ($gDayNo >= 365) {
+            $gDayNo++;
+        } else {
+            $leap = false;
+        }
+    }
 
-?>
+    $gy += 4 * (int)($gDayNo / 1461);
+    $gDayNo %= 1461;
+
+    if ($gDayNo >= 366) {
+        $leap  = false;
+        $gDayNo--;
+        $gy    += (int)($gDayNo / 365);
+        $gDayNo %= 365;
+    }
+
+    $gDaysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
+    if ($leap) {
+        $gDaysInMonth[1] = 29;
+    }
+
+    for ($i = 0; $i < 12 && $gDayNo >= $gDaysInMonth[$i]; $i++) {
+        $gDayNo -= $gDaysInMonth[$i];
+    }
+
+    $gm = $i + 1;
+    $gd = $gDayNo + 1;
+
+    return [$gy, $gm, $gd];
+}

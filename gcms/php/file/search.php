@@ -1,94 +1,75 @@
 <?php
-require $_SERVER['DOCUMENT_ROOT'].'/gcms/php/file/gconfig.php';
+declare(strict_types=1);
+session_start();
 
-function search_result($search,$text){
-		$text = strip_tags($text);
-		$temp = explode($search,$text,2);
-		$templen = strlen($temp[0]);
-		if ($templen > 150) {$templen = $templen - 50;}
-		$temp[0] = substr($temp[0],$templen);
-		////
-		$temp[0] = substr($temp[0],strpos($temp[0]," "));
-		////
-		$temp[0] = " ... " . $temp[0];
-		$temp[1] = substr($temp[1],0,250);
-		////
-		$temp[1] = substr($temp[1],0,strrpos($temp[1]," "));
-		////
-		$temp[1] = $temp[1] . " ... ";
-		$final = $temp[0] . "<span style='color:red;background-color:yellow' class='search_result'>" . $search . "</span>" . $temp[1];
-	return $final;	
-	
-	}
+// تنظیمات اصلی
+require_once __DIR__ . '/gconfig.php';
 
-if ( $_REQUEST[search] == "page" and $_REQUEST['inputsearch']  ){
+// تابع برش متن و برجسته‌سازی کلمه جستجو
+function highlight_search(string $needle, string $haystack): string
+{
+    $plain = strip_tags($haystack);
+    $parts = explode($needle, $plain, 2);
+    $beforeLen = strlen($parts[0]);
+    if ($beforeLen > 150) {
+        $parts[0] = substr($parts[0], $beforeLen - 50);
+    }
+    $context = ' ... ' . substr($parts[0], strpos($parts[0], ' '));
+    $after   = substr($parts[1], 0, 250);
+    $after   = substr($after, 0, strrpos($after, ' ')) . ' ... ';
+    return $context
+         . "<span style='color:red;background-color:yellow'>{$needle}</span>"
+         . $after;
+}
 
-	//security////////////////////////
-	$sec20time = time()-10;
-	if ( $_SESSION['searchformtime'] > $sec20time){
-		if ($_SESSION["hacker"] == "searchformtime" and $_SESSION['countersearchform'] > 3 ){
-		mysql_query("INSERT INTO `gcms_blocked` ( `ip` ) VALUES ('$_SERVER[REMOTE_ADDR]')",$link);
-		}
-		$_SESSION['hacker'] = "searchformtime"  ;
-	if ( $_SESSION['countersearchform']  >= 1 ) { ++$_SESSION['countersearchform']; }else { $_SESSION['countersearchform']= 1; }
-		sleep(8);
-		 }else{ $_SESSION['searchformtime'] =  time();}
-	
-	//security\\\\\\\\\\\\\\\\\\\\\\\
-	
-	$redsearch = htmlspecialchars("$_REQUEST[inputsearch]", ENT_QUOTES);
-	$search = ereg_replace(" ","%",$_REQUEST['inputsearch']);
-	
-	if ( $_REQUEST[option] == 'page_title' ) {
-	$sqlstr = " page_title LIKE  '%$search%' ";
-	}
-	else  {
-	$sqlstr = " page_content LIKE  '%$search%' OR  page_title LIKE  '%$search%'  ";
-	}
-	
-		
-	// تعریف کوئری   
-		$querysp = "SELECT * FROM `gcms_pages` WHERE  $sqlstr ";
-	// نتایج کوئری
-		$resultsp = mysql_query($querysp,$link);
-	// دریافت نتایج در سطر	
-	
-				while($rowsp = mysql_fetch_array($resultsp)){
-				
-				$set = search_result($redsearch,$rset);
-				if ( $_REQUEST[option] == 'page_title' ) {
-				$rowsp[page_title] =search_result($redsearch,$rowsp[page_title]);
-				}
-				else{
-				$rowsp[page_content] =search_result($redsearch,$rowsp[page_content]);
-				}
-				
-	
-				$is++;
-				$searchresult = $searchresult ."$is -  <b><a href='?part=pages&id=$rowsp[id]' >$rowsp[page_title] </a> </b> <br> 
-				$rowsp[page_content] <br> 
-				";
-				}
-				
-				if (!$searchresult){
-					$searchresult = "هیچ نتیجه ای برای جستجوی <b>$redsearch</b> در میان صفحات پیدا نشد. $rowsp";
-				}
-				
-			}else{
-					$message = " هیچ اطلاعاتی ارسال نکرده اید. " ;
-			}
+$searchInput = trim($_REQUEST['inputsearch'] ?? '');
+$option      = $_REQUEST['option'] ?? '';
 
-/////////////////////////////////////////////////////////////////////////////////////////			
-			$gcms->assign('searchresult',$searchresult); 
-			$gcms->assign('message',$message); 
+// اعتبارسنجی
+if ($_REQUEST['search'] === 'page' && $searchInput !== '') {
+    // جلوگیری از اسپم
+    $now = time();
+    if (!isset($_SESSION['last_search_time']) || $now - $_SESSION['last_search_time'] > 10) {
+        $_SESSION['last_search_time'] = $now;
+        $_SESSION['search_count'] = 0;
+    }
+    if (++$_SESSION['search_count'] > 3) {
+        mysql_query(
+            "INSERT INTO `gcms_blocked` (`ip`) VALUES ('" . mysql_real_escape_string($_SERVER['REMOTE_ADDR']) . "')",
+            $link
+        );
+        die('Too many search attempts.');
+    }
 
+    $needle = mysql_real_escape_string($searchInput);
+    $likeStr = str_replace(' ', '%', $needle);
+    $where  = $option === 'page_title'
+            ? "page_title LIKE '%{$likeStr}%'"
+            : "(page_content LIKE '%{$likeStr}%' OR page_title LIKE '%{$likeStr}%')";
 
-/////////////////////////////////////////////////////////////////////////////////////////			
-			$gcms->assign('menu_active',"?part=search"); 
-			$gcms->assign('part',"search"); 
-			
-			$gcms->display("index/index.tpl");
-	
-	
+    $sql   = "SELECT * FROM `gcms_pages` WHERE {$where}";
+    $res   = mysql_query($sql, $link);
+    $resultHtml = '';
 
-?>
+    while ($row = mysql_fetch_assoc($res)) {
+        $field = $option === 'page_title' ? 'page_title' : 'page_content';
+        $row[$field] = highlight_search($searchInput, $row[$field]);
+        $resultHtml .= sprintf(
+            "%d - <b><a href='?part=pages&id=%d'>%s</a></b><br>%s<br>",
+            ++$i, $row['id'], $row['page_title'], $row[$field]
+        );
+    }
+
+    if (empty($resultHtml)) {
+        $message = "هیچ نتیجه‌ای برای «{$searchInput}» یافت نشد.";
+        $gcms->assign('message', $message);
+    } else {
+        $gcms->assign('searchresult', $resultHtml);
+    }
+} else {
+    $gcms->assign('message', 'لطفاً عبارت جستجو را وارد کنید.');
+}
+
+$gcms->assign('menu_active', '?part=search');
+$gcms->assign('part', 'search');
+$gcms->display('index/index.tpl');

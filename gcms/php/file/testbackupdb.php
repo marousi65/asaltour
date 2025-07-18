@@ -1,29 +1,27 @@
-
 <?php
-	// database var
-		$host = 'localhost';
-		$user = 'asaltour_asltrgc';
-		$pass = 'H^}r_3;aA@%;';
-		$dbname = 'asaltour_aslgcms';
-	// connect database
-		$link = mysql_connect($host,$user,$pass);
-		mysql_select_db($dbname,$link);
+declare(strict_types=1);
+session_start();
 
-echo "test <br>";
- $tableName  = 'gcms_login';
-$backupFile = 'mypet.sql';
-$query      = "SELECT * INTO OUTFILE '$backupFile' FROM $tableName";
-$query2      = "SELECT * FROM $tableName";
+// بارگذاری تنظیمات دیتابیس
+require_once __DIR__ . '/gconfig.php';
 
-$result = mysql_query($query , $link );
-$result2 = mysql_query($query2 , $link );
+$tableName  = 'gcms_login';
+$backupPath = __DIR__ . '/gcms_login_backup.sql';
 
-echo $result ;
-echo "<br>
-$query <br>$query2  ";
+// کوئری خروجی به فایل
+$query1 = "SELECT * INTO OUTFILE '{$backupPath}' FROM `{$tableName}`";
+$query2 = "SELECT * FROM `{$tableName}`";
 
-echo $result2 ;
+// اجرا
+$res1 = mysql_query($query1, $link);
+$res2 = mysql_query($query2, $link);
+
+echo 'Backup to file: ' . ($res1 ? 'OK' : 'FAIL') . "<br>\n";
+echo "Query1: {$query1}<br>\n";
+if ($res2) {
+    echo 'Rows in table: ' . mysql_num_rows($res2) . "<br>\n";
+} else {
+    echo "Query2 failed: {$query2}<br>\n";
+}
 
 mysql_close($link);
-
-?>
